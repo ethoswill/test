@@ -8,6 +8,7 @@ Route::get('/', function () {
     return response()->json([
         'status' => 'ok',
         'message' => 'Laravel app is running',
+        'admin_url' => url('/admin'),
         'timestamp' => date('Y-m-d H:i:s')
     ]);
 });
