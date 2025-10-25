@@ -44,7 +44,6 @@
         ],
         "post-install-cmd": [
             "@php artisan key:generate --no-interaction",
-            "@php artisan migrate --force",
             "@php artisan storage:link"
         ],
         "dev": [
