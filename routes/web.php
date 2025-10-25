@@ -9,7 +9,9 @@ Route::get('/', function () {
         'status' => 'ok',
         'message' => 'Laravel app is running',
         'admin_url' => url('/admin'),
-        'timestamp' => date('Y-m-d H:i:s')
+        'timestamp' => date('Y-m-d H:i:s'),
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version()
     ]);
 });
 
