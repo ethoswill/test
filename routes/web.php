@@ -7,11 +7,27 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return response()->json([
         'status' => 'ok',
-        'message' => 'Laravel app is running',
+        'message' => 'Laravel app is running (Stage 1)',
         'admin_url' => url('/admin'),
         'timestamp' => date('Y-m-d H:i:s'),
         'php_version' => PHP_VERSION,
-        'laravel_version' => app()->version()
+        'laravel_version' => app()->version(),
+        'stage' => '1 - Basic Laravel'
+    ]);
+});
+
+// Simple admin route (Stage 1 - no database)
+Route::get('/admin', function () {
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'Admin panel (Stage 1 - Basic)',
+        'features' => [
+            'Laravel framework' => 'active',
+            'Database' => 'not connected yet',
+            'Filament admin' => 'coming in stage 2'
+        ],
+        'next_stage' => 'Add database support',
+        'timestamp' => date('Y-m-d H:i:s')
     ]);
 });
 
