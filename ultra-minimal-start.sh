@@ -1,14 +1,16 @@
 #!/bin/bash
 
-echo "=== ULTRA MINIMAL START ==="
+echo "=== PRODUCTION STARTUP ==="
 
-# Create the most basic possible index.php
-cat > public/index.php << 'EOF'
-<?php
-header('Content-Type: application/json');
-echo '{"status":"ok","message":"Ultra minimal app","timestamp":"' . date('Y-m-d H:i:s') . '"}';
-?>
-EOF
+# Ensure Laravel index is in place
+if [ ! -f public/index.php ]; then
+    cp backup-original-index.php public/index.php
+fi
 
-echo "Starting ultra minimal PHP server..."
+# Clear any caches
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
+
+echo "Starting Laravel app with PHP built-in server..."
 exec php -S 0.0.0.0:$PORT -t public
