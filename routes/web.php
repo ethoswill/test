@@ -10,11 +10,19 @@ Route::get('/', function () {
 
 // Health check endpoint for Railway
 Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now(),
-        'database' => 'connected'
-    ]);
+    try {
+        // Simple health check that doesn't require database
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => date('Y-m-d H:i:s'),
+            'app' => 'running'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
 });
 
 // Purchase Order PDF Routes

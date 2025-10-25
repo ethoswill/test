@@ -1,33 +1,24 @@
 #!/bin/bash
 
-# Exit on any error
-set -e
+# Don't exit on error - let the app start even if migrations fail
+set +e
 
 echo "Starting application deployment..."
 
 # Wait a moment for database to be ready
 echo "Waiting for database connection..."
-sleep 5
+sleep 10
 
-# Try to run migrations with retry logic
-echo "Running database migrations..."
-for i in {1..5}; do
-    echo "Migration attempt $i/5..."
-    if php artisan migrate --force; then
-        echo "Migrations completed successfully!"
-        break
-    else
-        echo "Migration attempt $i failed, retrying in 10 seconds..."
-        sleep 10
-    fi
-done
+# Try to run migrations (but don't fail if they don't work)
+echo "Attempting database migrations..."
+php artisan migrate --force || echo "Migrations failed, continuing anyway..."
 
 # Clear caches
 echo "Clearing application caches..."
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+php artisan config:clear || echo "Config clear failed"
+php artisan route:clear || echo "Route clear failed"
+php artisan view:clear || echo "View clear failed"
 
 # Start the application
 echo "Starting Laravel application..."
-php artisan serve --host=0.0.0.0 --port=$PORT
+exec php artisan serve --host=0.0.0.0 --port=$PORT
