@@ -1,3 +1,9 @@
+#!/bin/bash
+
+echo "=== LARAVEL TEST STAGE 1: Test Laravel Loading ==="
+
+# Create a test index.php that tries to load Laravel but falls back gracefully
+cat > public/index.php << 'EOF'
 <?php
 header('Content-Type: application/json');
 
@@ -40,3 +46,7 @@ try {
 
 echo json_encode($response, JSON_PRETTY_PRINT);
 ?>
+EOF
+
+echo "Starting Laravel test server..."
+exec php -S 0.0.0.0:$PORT -t public
