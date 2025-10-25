@@ -16,9 +16,18 @@ php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 php artisan view:clear 2>/dev/null || true
 
-# Restore original Laravel index.php
-echo "Restoring Laravel index.php..."
-cp backup-original-index.php public/index.php
+# Ensure we have the correct Laravel index.php
+echo "Ensuring Laravel index.php is correct..."
+if [ ! -f "public/index.php" ] || ! grep -q "LARAVEL_START" public/index.php; then
+    echo "Restoring Laravel index.php from backup..."
+    cp backup-original-index.php public/index.php
+else
+    echo "Laravel index.php already correct"
+fi
+
+# Verify the file
+echo "Verifying index.php content..."
+head -5 public/index.php
 
 # Start Laravel with artisan serve
 echo "Starting Laravel with artisan serve on port $PORT..."
