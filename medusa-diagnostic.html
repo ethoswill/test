@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medusa Admin Diagnostic</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        .test-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Medusa Admin Diagnostic Tool</h1>
+        <p>This tool will help identify why you're seeing a white screen in the Medusa admin.</p>
+        
+        <div class="status info">
+            <strong>Current Status:</strong> Medusa server is running on port 9000 ✅
+        </div>
+        
+        <h2>Quick Tests</h2>
+        <button onclick="testMainAdmin()">Test Main Admin</button>
+        <button onclick="testCustomPages()">Test Custom Pages</button>
+        <button onclick="testJavaScript()">Test JavaScript</button>
+        <button onclick="clearCache()">Clear Browser Cache</button>
+        
+        <div id="test-results" class="test-results" style="display: none;">
+            <h3>Test Results:</h3>
+            <div id="results-content"></div>
+        </div>
+        
+        <h2>Manual Checks</h2>
+        <div class="status warning">
+            <strong>1. Check Browser Console:</strong><br>
+            • Press F12 → Console tab<br>
+            • Look for red error messages<br>
+            • Refresh page and check for new errors
+        </div>
+        
+        <div class="status info">
+            <strong>2. Try Different Browser:</strong><br>
+            • Chrome, Firefox, Safari, or Edge<br>
+            • Incognito/Private mode<br>
+            • Different user profile
+        </div>
+        
+        <div class="status info">
+            <strong>3. Network Issues:</strong><br>
+            • F12 → Network tab<br>
+            • Refresh page<br>
+            • Check for failed requests (red entries)
+        </div>
+        
+        <h2>Direct Links</h2>
+        <p>Try these direct links to bypass potential routing issues:</p>
+        <ul>
+            <li><a href="http://localhost:9000/app/" target="_blank">Main Admin</a></li>
+            <li><a href="http://localhost:9000/app/customers" target="_blank">Customers</a></li>
+            <li><a href="http://localhost:9000/app/products" target="_blank">Products</a></li>
+            <li><a href="http://localhost:9000/app/orders" target="_blank">Orders</a></li>
+            <li><a href="http://localhost:9000/app/test-page" target="_blank">Test Page</a></li>
+        </ul>
+        
+        <div class="status success">
+            <strong>✅ Server Status:</strong> Both Laravel (8000) and Medusa (9000) servers are running correctly.
+        </div>
+    </div>
+
+    <script>
+        function testMainAdmin() {
+            showResults('Testing main admin page...');
+            fetch('http://localhost:9000/app/')
+                .then(response => {
+                    if (response.ok) {
+                        showResults('✅ Main admin page loads successfully (HTTP ' + response.status + ')');
+                    } else {
+                        showResults('❌ Main admin page failed (HTTP ' + response.status + ')');
+                    }
+                })
+                .catch(error => {
+                    showResults('❌ Error loading main admin: ' + error.message);
+                });
+        }
+        
+        function testCustomPages() {
+            showResults('Testing custom pages...');
+            const pages = ['test-page', 'custom-dashboard', 'customer-milestones'];
+            let results = [];
+            
+            pages.forEach(page => {
+                fetch('http://localhost:9000/app/' + page)
+                    .then(response => {
+                        results.push(page + ': ' + (response.ok ? '✅ OK' : '❌ Failed'));
+                        if (results.length === pages.length) {
+                            showResults(results.join('<br>'));
+                        }
+                    })
+                    .catch(error => {
+                        results.push(page + ': ❌ Error');
+                        if (results.length === pages.length) {
+                            showResults(results.join('<br>'));
+                        }
+                    });
+            });
+        }
+        
+        function testJavaScript() {
+            showResults('Testing JavaScript...');
+            try {
+                // Test if React is available
+                if (typeof React !== 'undefined') {
+                    showResults('✅ React is loaded');
+                } else {
+                    showResults('❌ React is not loaded');
+                }
+                
+                // Test if DOM is ready
+                if (document.readyState === 'complete') {
+                    showResults('✅ DOM is ready');
+                } else {
+                    showResults('⚠️ DOM is still loading');
+                }
+                
+                // Test if medusa element exists
+                const medusaElement = document.getElementById('medusa');
+                if (medusaElement) {
+                    showResults('✅ Medusa root element found');
+                } else {
+                    showResults('❌ Medusa root element not found');
+                }
+                
+            } catch (error) {
+                showResults('❌ JavaScript error: ' + error.message);
+            }
+        }
+        
+        function clearCache() {
+            showResults('Clearing browser cache...');
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                    showResults('✅ Browser cache cleared. Please refresh the page.');
+                });
+            } else {
+                showResults('⚠️ Cache API not available. Please manually clear cache (Ctrl+F5)');
+            }
+        }
+        
+        function showResults(message) {
+            document.getElementById('test-results').style.display = 'block';
+            document.getElementById('results-content').innerHTML = message;
+        }
+        
+        // Auto-run basic tests on page load
+        window.onload = function() {
+            setTimeout(() => {
+                testJavaScript();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
+
+

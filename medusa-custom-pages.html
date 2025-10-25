@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medusa Custom Pages - Quick Access</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 18px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .card-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .card-url {
+            font-family: monospace;
+            font-size: 12px;
+            color: #999;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Medusa Custom Pages</h1>
+            <p>Quick access to all your custom admin pages</p>
+        </div>
+        
+        <div class="grid">
+            <div class="card" onclick="window.open('http://localhost:9000/app/custom-dashboard', '_blank')">
+                <div class="card-icon">🏠</div>
+                <div class="card-title">Custom Dashboard</div>
+                <div class="card-description">Main dashboard with quick access to all features and statistics</div>
+                <div class="card-url">http://localhost:9000/app/custom-dashboard</div>
+            </div>
+            
+            <div class="card" onclick="window.open('http://localhost:9000/app/customer-milestones', '_blank')">
+                <div class="card-icon">🏆</div>
+                <div class="card-title">Customer Milestones</div>
+                <div class="card-description">Track customer achievements, loyalty levels, and reward milestones</div>
+                <div class="card-url">http://localhost:9000/app/customer-milestones</div>
+            </div>
+            
+            <div class="card" onclick="window.open('http://localhost:9000/app/laravel-integration', '_blank')">
+                <div class="card-icon">🔗</div>
+                <div class="card-title">Laravel Integration</div>
+                <div class="card-description">Manage sync status between Laravel and Medusa, view API connections</div>
+                <div class="card-url">http://localhost:9000/app/laravel-integration</div>
+            </div>
+            
+            <div class="card" onclick="window.open('http://localhost:9000/app/embroidery-management', '_blank')">
+                <div class="card-icon">🎨</div>
+                <div class="card-title">Embroidery Management</div>
+                <div class="card-description">Track embroidery designs, customization data, and product status</div>
+                <div class="card-url">http://localhost:9000/app/embroidery-management</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="http://localhost:9000/app" class="back-link">← Back to Medusa Admin</a>
+        </div>
+    </div>
+</body>
+</html>
+
+

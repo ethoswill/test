@@ -1,0 +1,228 @@
+import { definePageConfig } from "@medusajs/admin-sdk"
+import { useState, useEffect } from "react"
+
+interface EmbroideryProduct {
+  id: string
+  title: string
+  handle: string
+  customization_method: string
+  embroidery_data?: {
+    fileName: string
+    fileType: string
+    width: number
+    height: number
+    embroideryStyle: string
+    threadColor: string
+    embroideryType: string
+    notes?: string
+  }
+}
+
+const EmbroideryManagement = () => {
+  const [products, setProducts] = useState<EmbroideryProduct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<string>("all")
+
+  useEffect(() => {
+    fetchEmbroideryProducts()
+  }, [])
+
+  const fetchEmbroideryProducts = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/admin/products?fields=id,title,handle,metadata')
+      const data = await response.json()
+      
+      const embroideryProducts = data.products?.filter((product: any) => 
+        product.metadata?.customization_method === 'Embroidery' ||
+        product.metadata?.embroidery_data
+      ) || []
+      
+      setProducts(embroideryProducts)
+    } catch (error) {
+      console.error("Error fetching embroidery products:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredProducts = products.filter(product => {
+    if (filter === "all") return true
+    if (filter === "with-designs") return product.embroidery_data
+    if (filter === "without-designs") return !product.embroidery_data
+    return true
+  })
+
+  const getStatusColor = (product: EmbroideryProduct) => {
+    if (product.embroidery_data) return "bg-green-100 text-green-800"
+    return "bg-yellow-100 text-yellow-800"
+  }
+
+  const getStatusText = (product: EmbroideryProduct) => {
+    if (product.embroidery_data) return "Design Ready"
+    return "Needs Design"
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Embroidery Management</h1>
+        <button
+          onClick={fetchEmbroideryProducts}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {/* Filter Controls */}
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex space-x-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="all"
+              checked={filter === "all"}
+              onChange={(e) => setFilter(e.target.value)}
+              className="mr-2"
+            />
+            All Products ({products.length})
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="with-designs"
+              checked={filter === "with-designs"}
+              onChange={(e) => setFilter(e.target.value)}
+              className="mr-2"
+            />
+            With Designs ({products.filter(p => p.embroidery_data).length})
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="without-designs"
+              checked={filter === "without-designs"}
+              onChange={(e) => setFilter(e.target.value)}
+              className="mr-2"
+            />
+            Needs Designs ({products.filter(p => !p.embroidery_data).length})
+          </label>
+        </div>
+      </div>
+
+      {/* Products List */}
+      <div className="bg-white rounded-lg shadow">
+        {loading ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading embroidery products...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            No embroidery products found.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Product
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Design Details
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {product.title}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {product.handle}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(product)}`}>
+                        {getStatusText(product)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {product.embroidery_data ? (
+                        <div>
+                          <div>File: {product.embroidery_data.fileName}</div>
+                          <div>Style: {product.embroidery_data.embroideryStyle}</div>
+                          <div>Color: {product.embroidery_data.threadColor}</div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">No design uploaded</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => window.open(`/app/products/${product.id}`, '_blank')}
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                      >
+                        Edit
+                      </button>
+                      {product.embroidery_data && (
+                        <button
+                          onClick={() => {
+                            // Download or view design
+                            console.log("View design for:", product.id)
+                          }}
+                          className="text-green-600 hover:text-green-900"
+                        >
+                          View Design
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Summary Stats */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-blue-800">Total Products</h3>
+          <p className="text-2xl font-bold text-blue-600">{products.length}</p>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-green-800">Designs Ready</h3>
+          <p className="text-2xl font-bold text-green-600">
+            {products.filter(p => p.embroidery_data).length}
+          </p>
+        </div>
+        <div className="bg-yellow-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-yellow-800">Needs Design</h3>
+          <p className="text-2xl font-bold text-yellow-600">
+            {products.filter(p => !p.embroidery_data).length}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export const config = definePageConfig({
+  label: "Embroidery Management",
+  icon: "paint-brush",
+})
+
+export default EmbroideryManagement

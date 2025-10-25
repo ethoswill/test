@@ -1,0 +1,378 @@
+/* Professional Button Styling Override */
+
+/* Primary buttons - use neutral gray instead of blue */
+.filament-button-primary {
+    background-color: #4b5563 !important;
+    color: white !important;
+}
+
+.filament-button-primary:hover {
+    background-color: #374151 !important;
+}
+
+.filament-button-primary:focus {
+    background-color: #374151 !important;
+}
+
+.filament-button-primary:active {
+    background-color: #1f2937 !important;
+}
+
+/* Success buttons - use neutral gray instead of green */
+.filament-button-success {
+    background-color: #4b5563 !important;
+    color: white !important;
+}
+
+.filament-button-success:hover {
+    background-color: #374151 !important;
+}
+
+.filament-button-success:focus {
+    background-color: #374151 !important;
+}
+
+.filament-button-success:active {
+    background-color: #1f2937 !important;
+}
+
+/* Info buttons - use neutral gray instead of blue */
+.filament-button-info {
+    background-color: #4b5563 !important;
+    color: white !important;
+}
+
+.filament-button-info:hover {
+    background-color: #374151 !important;
+}
+
+.filament-button-info:focus {
+    background-color: #374151 !important;
+}
+
+.filament-button-info:active {
+    background-color: #1f2937 !important;
+}
+
+/* Warning buttons - use neutral gray instead of yellow */
+.filament-button-warning {
+    background-color: #4b5563 !important;
+    color: white !important;
+}
+
+.filament-button-warning:hover {
+    background-color: #374151 !important;
+}
+
+.filament-button-warning:focus {
+    background-color: #374151 !important;
+}
+
+.filament-button-warning:active {
+    background-color: #1f2937 !important;
+}
+
+/* Danger buttons - use neutral gray instead of red */
+.filament-button-danger {
+    background-color: #4b5563 !important;
+    color: white !important;
+}
+
+.filament-button-danger:hover {
+    background-color: #374151 !important;
+}
+
+.filament-button-danger:focus {
+    background-color: #374151 !important;
+}
+
+.filament-button-danger:active {
+    background-color: #1f2937 !important;
+}
+
+/* Secondary buttons - keep as is but make more subtle */
+.filament-button-secondary {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+.filament-button-secondary:hover {
+    background-color: #e5e7eb !important;
+}
+
+.filament-button-secondary:focus {
+    background-color: #e5e7eb !important;
+}
+
+.filament-button-secondary:active {
+    background-color: #d1d5db !important;
+}
+
+/* Outline buttons - use neutral border */
+.filament-button-outline {
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+}
+
+.filament-button-outline:hover {
+    background-color: #f9fafb !important;
+}
+
+.filament-button-outline:focus {
+    background-color: #f9fafb !important;
+}
+
+.filament-button-outline:active {
+    background-color: #f3f4f6 !important;
+}
+
+/* Ghost buttons - use neutral text */
+.filament-button-ghost {
+    color: #4b5563 !important;
+}
+
+.filament-button-ghost:hover {
+    background-color: #f9fafb !important;
+}
+
+.filament-button-ghost:focus {
+    background-color: #f9fafb !important;
+}
+
+.filament-button-ghost:active {
+    background-color: #f3f4f6 !important;
+}
+
+/* Link buttons - use neutral text */
+.filament-button-link {
+    color: #4b5563 !important;
+}
+
+.filament-button-link:hover {
+    color: #1f2937 !important;
+}
+
+.filament-button-link:focus {
+    color: #1f2937 !important;
+}
+
+.filament-button-link:active {
+    color: #111827 !important;
+}
+
+/* Table action buttons */
+.filament-tables-action-button {
+    color: #4b5563 !important;
+}
+
+.filament-tables-action-button:hover {
+    color: #1f2937 !important;
+}
+
+.filament-tables-action-button:focus {
+    color: #1f2937 !important;
+}
+
+/* Header action buttons */
+.filament-header-action {
+    color: #4b5563 !important;
+}
+
+.filament-header-action:hover {
+    color: #1f2937 !important;
+}
+
+.filament-header-action:focus {
+    color: #1f2937 !important;
+}
+
+/* Form action buttons */
+.filament-form-action {
+    color: #4b5563 !important;
+}
+
+.filament-form-action:hover {
+    color: #1f2937 !important;
+}
+
+.filament-form-action:focus {
+    color: #1f2937 !important;
+}
+
+/* Professional Text Styling for Dashboard */
+
+/* Stat widget descriptions - make more professional */
+.filament-stats-overview-widget .filament-stats-overview-widget-stat-description {
+    color: #6b7280 !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+}
+
+/* Stat widget values - make more professional */
+.filament-stats-overview-widget .filament-stats-overview-widget-stat-value {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+/* Stat widget labels - make more professional */
+.filament-stats-overview-widget .filament-stats-overview-widget-stat-label {
+    color: #374151 !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Table headings - make more professional */
+.filament-tables-table .filament-tables-header-cell {
+    color: #374151 !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Table cell text - make more professional */
+.filament-tables-table .filament-tables-cell {
+    color: #4b5563 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Badge colors - make more professional */
+.filament-badge-success {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.filament-badge-danger {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.filament-badge-warning {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.filament-badge-info {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.filament-badge-secondary {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+/* Icon colors - make more professional */
+.filament-stats-overview-widget .filament-stats-overview-widget-stat-icon {
+    color: #6b7280 !important;
+}
+
+/* Table action icons - make more professional */
+.filament-tables-table .filament-tables-action-icon {
+    color: #6b7280 !important;
+}
+
+/* Widget headings - make more professional */
+.filament-widget .filament-widget-heading {
+    color: #111827 !important;
+    font-weight: 600 !important;
+    font-size: 1.125rem !important;
+}
+
+/* Helper text - make more professional */
+.filament-helper-text {
+    color: #6b7280 !important;
+    font-size: 0.75rem !important;
+    font-weight: 400 !important;
+}
+
+/* Placeholder text - make more professional */
+.filament-placeholder {
+    color: #9ca3af !important;
+    font-style: italic !important;
+}
+
+/* Status indicators - make more professional */
+.filament-status-indicator {
+    color: #6b7280 !important;
+}
+
+/* Money formatting - make more professional */
+.filament-money {
+    color: #374151 !important;
+    font-weight: 500 !important;
+}
+
+/* Date formatting - make more professional */
+.filament-date {
+    color: #6b7280 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Override any remaining colorful text */
+[class*="text-green-"] {
+    color: #374151 !important;
+}
+
+[class*="text-red-"] {
+    color: #374151 !important;
+}
+
+[class*="text-blue-"] {
+    color: #374151 !important;
+}
+
+[class*="text-yellow-"] {
+    color: #374151 !important;
+}
+
+[class*="text-indigo-"] {
+    color: #374151 !important;
+}
+
+[class*="text-purple-"] {
+    color: #374151 !important;
+}
+
+[class*="text-pink-"] {
+    color: #374151 !important;
+}
+
+/* Override any remaining colorful backgrounds for text elements */
+[class*="bg-green-"]:not(button):not([role="button"]) {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+[class*="bg-red-"]:not(button):not([role="button"]) {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+[class*="bg-blue-"]:not(button):not([role="button"]) {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+[class*="bg-yellow-"]:not(button):not([role="button"]) {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+[class*="bg-indigo-"]:not(button):not([role="button"]) {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+[class*="bg-purple-"]:not(button):not([role="button"]) {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+[class*="bg-pink-"]:not(button):not([role="button"]) {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
