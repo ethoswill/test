@@ -1,16 +1,20 @@
 #!/bin/bash
 
-echo "=== PRODUCTION STARTUP ==="
+set -e  # Exit on error
 
-# Ensure Laravel index is in place
+echo "=== PRODUCTION STARTUP ==="
+echo "PORT: ${PORT:-8000}"
+echo "PHP Version: $(php -v | head -n 1)"
+
+# Start with the ultra-minimal index for healthchecks
 if [ ! -f public/index.php ]; then
-    cp backup-original-index.php public/index.php
+    echo "Using ultra-minimal index.php for reliable healthchecks..."
+    cp public/index-simple.php public/index.php
 fi
 
-# Clear any caches
-php artisan config:clear || true
-php artisan route:clear || true
-php artisan view:clear || true
+# Set default PORT if not set
+PORT=${PORT:-8000}
 
-echo "Starting Laravel app with PHP built-in server..."
+echo "Starting PHP server on port $PORT..."
+echo "Using simple healthcheck endpoint for now"
 exec php -S 0.0.0.0:$PORT -t public
