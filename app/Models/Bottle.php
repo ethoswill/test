@@ -15,6 +15,7 @@ class Bottle extends Model
         'images',
         'material',
         'price',
+        'minimums',
         'color',
         'size',
         'is_active',

@@ -23,7 +23,13 @@ class ListThreadBookColors extends ListRecords
 
     public function getHeaderActions(): array
     {
-        $actions = [];
+        $actions = [
+            Action::make('create_thread_book_color')
+                ->label('New Thread Book Color')
+                ->icon('heroicon-o-plus')
+                ->color('success')
+                ->url(ThreadBookColorResource::getUrl('create')),
+        ];
 
         // Add download button
         $actions[] = Action::make('download_all_cads')

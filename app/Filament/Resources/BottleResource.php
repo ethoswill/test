@@ -57,6 +57,10 @@ class BottleResource extends Resource
                             ->numeric()
                             ->prefix('$')
                             ->placeholder('0.00'),
+                        Forms\Components\TextInput::make('minimums')
+                            ->label('Minimums')
+                            ->maxLength(255)
+                            ->placeholder('e.g., Minimum order 12 units'),
                         Forms\Components\TextInput::make('color')
                             ->label('Color')
                             ->maxLength(255),
