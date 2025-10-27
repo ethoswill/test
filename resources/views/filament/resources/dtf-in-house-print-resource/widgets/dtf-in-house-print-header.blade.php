@@ -7,14 +7,11 @@
             </x-slot>
             <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Sample of 3D puff print on garment showing texture and raised effect
+                    DTF (Direct To Film) print sample showing detailed graphics and vibrant colors
                 </p>
-                <img 
-                    src="https://cdn.shopify.com/s/files/1/0609/4752/9901/files/Screenshot_2025-10-26_at_20.51.27.png?v=1761537098" 
-                    alt="Puff Print Sample" 
-                    class="max-w-2xl w-full h-auto rounded-lg shadow-md"
-                    style="max-height: 500px; object-fit: contain;"
-                >
+                <p class="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Sample images and production notes for in-house DTF printing
+                </p>
             </div>
         </x-filament::section>
 

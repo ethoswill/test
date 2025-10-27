@@ -19,7 +19,7 @@ class BottleResource extends Resource
     protected static ?string $modelLabel = 'Bottle';
     protected static ?string $pluralModelLabel = 'Bottles';
     protected static ?string $navigationGroup = 'Bottles';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 0;
 
     public static function form(Form $form): Form
     {

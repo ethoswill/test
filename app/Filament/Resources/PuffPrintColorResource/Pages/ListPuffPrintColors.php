@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PuffPrintColorResource\Pages;
 
 use App\Filament\Resources\PuffPrintColorResource;
 use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintHeader;
+use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintMachineSettings;
 use App\Models\TeamNote;
 use Filament\Actions;
 use Filament\Forms\Components\Textarea;
@@ -69,6 +70,7 @@ class ListPuffPrintColors extends ListRecords
     {
         return [
             PuffPrintHeader::class,
+            PuffPrintMachineSettings::class,
         ];
     }
 }
