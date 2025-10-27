@@ -2,68 +2,68 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SockGripResource\Pages;
-use App\Filament\Resources\SockGripResource\RelationManagers;
-use App\Models\SockGrip;
+use App\Filament\Resources\BottleResource\Pages;
+use App\Models\Bottle;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class SockGripResource extends Resource
+class BottleResource extends Resource
 {
-    protected static ?string $model = SockGrip::class;
+    protected static ?string $model = Bottle::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-finger-print';
-    protected static ?string $navigationLabel = 'Grips';
-    protected static ?string $modelLabel = 'Grip';
-    protected static ?string $pluralModelLabel = 'Grips';
-    protected static ?string $navigationGroup = 'Socks';
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationIcon = 'heroicon-o-beaker';
+    protected static ?string $navigationLabel = 'Bottles';
+    protected static ?string $modelLabel = 'Bottle';
+    protected static ?string $pluralModelLabel = 'Bottles';
+    protected static ?string $navigationGroup = 'Bottles';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Sock Grip Information')
+                Forms\Components\Section::make('Bottle Information')
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Sock Grip Style')
+                            ->label('Bottle Style')
                             ->required()
                             ->maxLength(255)
-                            ->placeholder('e.g., Athletic Crew Socks, Dress Socks'),
+                            ->placeholder('e.g., Water Bottle, Sport Bottle'),
                         Forms\Components\Textarea::make('description')
                             ->label('Bullet Points')
                             ->maxLength(1000)
                             ->rows(4)
-                            ->placeholder('Enter each bullet point on a new line:' . PHP_EOL . '• Moisture-wicking technology' . PHP_EOL . '• Cushioned sole for comfort' . PHP_EOL . '• Reinforced heel and toe'),
+                            ->placeholder('Enter each bullet point on a new line:' . PHP_EOL . '• Leak-proof design' . PHP_EOL . '• Durable material' . PHP_EOL . '• BPA-free'),
                         Forms\Components\Textarea::make('images')
-                            ->label('Sock Grip Image URLs')
+                            ->label('Bottle Image URLs')
                             ->maxLength(1000)
-                            ->placeholder('Enter image URLs (one per line):' . PHP_EOL . 'https://example.com/sock1.jpg' . PHP_EOL . 'https://example.com/sock2.jpg')
-                            ->helperText('Enter 1-3 image URLs for the sock grip style (one URL per line)')
+                            ->placeholder('Enter image URLs (one per line):' . PHP_EOL . 'https://example.com/bottle1.jpg' . PHP_EOL . 'https://example.com/bottle2.jpg')
+                            ->helperText('Enter 1-3 image URLs for the bottle style (one URL per line)')
                             ->rows(3),
                     ])
                     ->columns(1),
                 
                 Forms\Components\Section::make('Specifications')
                     ->schema([
-                        Forms\Components\TextInput::make('ribbing_height')
-                            ->label('Height of Sock Ribbing')
+                        Forms\Components\TextInput::make('material')
+                            ->label('Material')
                             ->maxLength(255)
-                            ->placeholder('e.g., 2 inches, 5cm'),
-                        Forms\Components\TextInput::make('fabric')
-                            ->label('Fabric')
-                            ->maxLength(255)
-                            ->placeholder('e.g., Cotton Blend, Merino Wool'),
+                            ->placeholder('e.g., Stainless Steel, Plastic'),
                         Forms\Components\TextInput::make('price')
                             ->label('Starting Price')
                             ->numeric()
                             ->prefix('$')
                             ->placeholder('0.00'),
+                        Forms\Components\TextInput::make('color')
+                            ->label('Color')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('size')
+                            ->label('Size')
+                            ->maxLength(255)
+                            ->placeholder('e.g., 500ml, 750ml'),
                     ])
                     ->columns(2),
             ]);
@@ -78,14 +78,15 @@ class SockGripResource extends Resource
                     ->height(120)
                     ->width(96)
                     ->circular(false)
-                    ->defaultImageUrl('/images/placeholder-sock.png'),
+                    ->defaultImageUrl('/images/placeholder-product.png')
+                    ->getStateUsing(fn (Bottle $record): ?string => $record->images[0] ?? null),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Sock Grip Style')
+                    ->label('Bottle Style')
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
                     ->size('lg')
-                    ->url(fn (SockGrip $record): string => route('filament.admin.resources.sock-grips.view', $record))
+                    ->url(fn (Bottle $record): string => route('filament.admin.resources.bottles.view', $record))
                     ->color('primary'),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Bullet Points')
@@ -109,26 +110,10 @@ class SockGripResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Available Socks'),
-                Tables\Filters\SelectFilter::make('material')
-                    ->options([
-                        'cotton' => 'Cotton',
-                        'wool' => 'Wool',
-                        'synthetic' => 'Synthetic',
-                        'bamboo' => 'Bamboo',
-                        'merino' => 'Merino Wool',
-                    ]),
-                Tables\Filters\SelectFilter::make('size')
-                    ->options([
-                        'XS' => 'Extra Small',
-                        'S' => 'Small',
-                        'M' => 'Medium',
-                        'L' => 'Large',
-                        'XL' => 'Extra Large',
-                    ]),
+                    ->label('Active Bottles'),
             ])
             ->actions([
-                // No actions - clicking the sock grip style name will navigate to view page
+                // No actions - clicking the bottle style name will navigate to view page
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -136,23 +121,16 @@ class SockGripResource extends Resource
                 ]),
             ])
             ->defaultSort('name', 'asc')
-            ->paginated(false); // Show all sock grips on one page for info sheet feel
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
+            ->paginated(false); // Show all bottles on one page
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSockGrips::route('/'),
-            'create' => Pages\CreateSockGrip::route('/create'),
-            'view' => Pages\ViewSockGrip::route('/{record}'),
-            'edit' => Pages\EditSockGrip::route('/{record}/edit'),
+            'index' => Pages\ListBottles::route('/'),
+            'create' => Pages\CreateBottle::route('/create'),
+            'view' => Pages\ViewBottle::route('/{record}'),
+            'edit' => Pages\EditBottle::route('/{record}/edit'),
         ];
     }
 }
