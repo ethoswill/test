@@ -3,13 +3,19 @@
 namespace App\Filament\Resources\DtfInHousePrintResource\Widgets;
 
 use App\Models\DtfWidgetContent;
-use Filament\Widgets\Widget;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Textarea;
-use Filament\Actions\Action;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Widgets\Widget;
 
-class DtfSourcing extends Widget
+class DtfSourcing extends Widget implements HasForms, HasActions
 {
+    use InteractsWithForms;
+    use InteractsWithActions;
+
     protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.dtf-sourcing';
 
     protected int | string | array $columnSpan = 'half';
@@ -20,6 +26,9 @@ class DtfSourcing extends Widget
 
     public $content = '';
 
+    public $showEditModal = false;
+    public $editContent = '';
+
     public function mount(): void
     {
         $widget = DtfWidgetContent::firstOrCreate(
@@ -29,40 +38,31 @@ class DtfSourcing extends Widget
         
         $this->content = $widget->content ?: '';
     }
-
-    public function editContent(): Action
+    
+    public function openEditModal()
     {
-        return Action::make('edit_content')
-            ->label('Edit')
-            ->icon('heroicon-o-pencil')
-            ->form([
-                Textarea::make('content')
-                    ->label('Content')
-                    ->rows(10)
-                    ->default(fn () => $this->content),
-            ])
-            ->action(function (array $data): void {
-                $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'dtf_sourcing']);
-                $widget->content = $data['content'];
-                $widget->save();
-
-                $this->content = $widget->content;
-
-                Notification::make()
-                    ->title('Content updated successfully!')
-                    ->success()
-                    ->send();
-            })
-            ->requiresConfirmation(false)
-            ->modalHeading('Edit DTF Sourcing')
-            ->modalSubmitActionLabel('Save');
+        $this->editContent = $this->content;
+        $this->showEditModal = true;
     }
-
-    protected function getActions(): array
+    
+    public function closeEditModal()
     {
-        return [
-            $this->editContent(),
-        ];
+        $this->showEditModal = false;
+    }
+    
+    public function saveContent()
+    {
+        $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'dtf_sourcing']);
+        $widget->content = $this->editContent;
+        $widget->save();
+        
+        $this->content = $widget->content;
+        $this->showEditModal = false;
+        
+        Notification::make()
+            ->title('Content updated successfully!')
+            ->success()
+            ->send();
     }
 }
 
