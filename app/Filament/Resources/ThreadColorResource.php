@@ -49,15 +49,15 @@ class ThreadColorResource extends Resource
                 Tables\Columns\TextColumn::make('color_name')
                     ->label('Thread Number')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn ($record) => route('filament.admin.resources.thread-colors.edit', $record))
+                    ->color('primary'),
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Swatch Image'),
             ])
             ->filters([
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
