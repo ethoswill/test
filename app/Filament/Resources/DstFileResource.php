@@ -18,7 +18,7 @@ class DstFileResource extends Resource
 
     protected static ?string $navigationLabel = 'DST Files';
 
-    protected static ?string $navigationGroup = 'In House Print';
+    protected static ?string $navigationGroup = 'Embroidery';
 
     protected static ?int $navigationSort = 3;
 
