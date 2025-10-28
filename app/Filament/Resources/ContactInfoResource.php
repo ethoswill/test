@@ -35,39 +35,13 @@ class ContactInfoResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('title')
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->rows(2)
-                    ->maxLength(500),
-                Forms\Components\TextInput::make('phone')
-                    ->tel()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('hours')
                     ->maxLength(255)
-                    ->placeholder('e.g., Mon-Fri 9am-6pm EST'),
-                Forms\Components\Select::make('icon_color')
-                    ->options([
-                        'blue' => 'Blue',
-                        'green' => 'Green',
-                        'purple' => 'Purple',
-                        'orange' => 'Orange',
-                        'red' => 'Red',
-                        'yellow' => 'Yellow',
-                    ])
-                    ->default('blue'),
-                Forms\Components\Select::make('icon_name')
-                    ->options([
-                        'chat' => 'Chat',
-                        'support' => 'Support',
-                        'card' => 'Card',
-                        'box' => 'Box',
-                        'heart' => 'Heart',
-                        'warning' => 'Warning',
-                    ])
-                    ->default('chat'),
+                    ->label('Phone Number')
+                    ->helperText('Enter the contact phone number'),
+                Forms\Components\Textarea::make('description')
+                    ->rows(3)
+                    ->maxLength(500)
+                    ->helperText('Enter contact instructions or details'),
                 Forms\Components\TextInput::make('sort_order')
                     ->numeric()
                     ->default(0)
@@ -91,10 +65,9 @@ class ContactInfoResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('is_emergency')
+                Tables\Columns\IconColumn::make('is_emergency')
                     ->label('24/7')
-                    ->boolean()
-                    ->badge(),
+                    ->boolean(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('sort_order')
@@ -128,7 +101,7 @@ class ContactInfoResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListContactInfos::route('/'),
+            'index' => Pages\ManageContactInfos::route('/'),
             'create' => Pages\CreateContactInfo::route('/create'),
             'edit' => Pages\EditContactInfo::route('/{record}/edit'),
         ];
