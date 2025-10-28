@@ -22,7 +22,7 @@ class ThreadColorSeeder extends Seeder
             ['color_code' => '1511', 'color_name' => '1511', 'color_number' => 1511, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xXApjz9eUCJz63pXPZhNCrdL562_xn4XZmWOEpr6BdMSMXzJz4uDb7IxqB_-XVIMfvkj8RVazRK_9Hw8xu0qafxP1_C1BeIaHQMHON_5oSmjmpfEKTq7aspa8wfAYsJ-bmNiEYw7dFVb0f_DcyHCw'],
             ['color_code' => '1512', 'color_name' => '1512', 'color_number' => 1512, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUst9Z9VqIIu6wMC1n2RKkfhgWpIuzh0uhocuzjczyrR2vgbdFvSRZMGPIFOo5yAoR_jsu5qqxY0zj6EXPk1sq8R4AIQSfIG60aJsD6w3D-1mnCv3SIAVeQ46oQY6eK6NNNU-eIgmZMe9UuiTkFq2E'],
             ['color_code' => '1513', 'color_name' => '1513', 'color_number' => 1513, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1514', 'color_name' => '1514', 'color_number' => 1514, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xXI2HmENY3CzFikbiz8_yo9nTH92lh3jJa1b0-91N3y_7MJeC0uCDxds16Bw6-lU96vDaDrbR9T9D8VnYO9jGb-dh_6Qn_3YMukVKI1cH_5o03xrIX8KFuFWmwRLa1z1vWmPyqnAYeO9_DT-4Ylo'],
+            ['color_code' => '1514', 'color_name' => '1514', 'color_number' => 1514, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xXI2HmENY3CzFikbiz8_yo9nTH92lh3jJa1b0-91PgFm3CRIYKDuqodccENu_pmquceryL_dVSfURaVy7rJX8lhi8kCpyw9XyNOm9b81iksGesT8fK6qNQ'],
             // Continue with more entries from the sheet...
         ];
 
