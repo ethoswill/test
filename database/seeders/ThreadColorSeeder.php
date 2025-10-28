@@ -12,35 +12,36 @@ class ThreadColorSeeder extends Seeder
      */
     public function run(): void
     {
-        // Array of thread color data from the Google Sheet
-        $threadColors = [
-            ['color_code' => '672', 'color_name' => '672', 'color_number' => 672, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xWM6Fle35zGrYE5hD2Kcltq7qH6s_L9oZfYwhUbOKuKX-gRki3bLYFv_Ki9SCQydqTPGklcrELcfKUAr4ZtnTwyYaZle9xdILOoQvlYNtP-9XA1z_akTWkDt46XJPVWvLmcmN7wuKUokUdrEjdrFZQ'],
-            ['color_code' => '1500', 'color_name' => '1500', 'color_number' => 1500, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUZlILtGzAJGWHyY6c8p04xBWdbGqgv_xNGnf6Agr06P-6eT17tWK3Jr-JKbZtV2SjZULGIFJ_Cmk3HmnXaHyDnoHlUBtSwNA0IS8NKsTJEZ-hs9B2pEEZYoDNDEU5uf6nbtsEnTrZ6HEWUdEBFUmQ'],
-            ['color_code' => '1508', 'color_name' => '1508', 'color_number' => 1508, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xU5cy-flUvIch63U-X7jWW2unEu0a_ULpINkGRiFwpAksQD7lR6_buSNTD9UGLhTJbi-Y1xoF02Bn_HOICoykSoz3aklGxz6cD9e0Zg5h1VDsWXjDL8ngpUA_KaiQqdJ2cUa8MDlmGl9QX1_xnXCoc'],
-            ['color_code' => '1509', 'color_name' => '1509', 'color_number' => 1509, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xU5BY12KffBf0BaadOIueAXUNsIlM1-TXmBbfghuH2FXSwVzPGtYPP6pfFo6UwwI5o-CmF1ZLbArqxEQ5UV-18Fl7iA1KZW6U9BTkUZaXeKo7N3isPNRJ1Bo8F0f_x0b3IJ71uYUOqyDZM2c71m0zk'],
-            ['color_code' => '1510', 'color_name' => '1510', 'color_number' => 1510, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xXMesJ3Z8y5_SlqD0hwRdaGPEVclsyuFT-6iT9Cekj6pwGqJQ4zRN3A5PQ5NSvMIdhLHrycuKhxODN0FaYBOM1T8QQjDSwmbpAn02mjH01VLSDjYxDmBqpVd7sCKWoXZkXB53IBO11InQR--hk1u1U'],
-            ['color_code' => '1511', 'color_name' => '1511', 'color_number' => 1511, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xXApjz9eUCJz63pXPZhNCrdL562_xn4XZmWOEpr6BdMSMXzJz4uDb7IxqB_-XVIMfvkj8RVazRK_9Hw8xu0qafxP1_C1BeIaHQMHON_5oSmjmpfEKTq7aspa8wfAYsJ-bmNiEYw7dFVb0f_DcyHCw'],
-            ['color_code' => '1512', 'color_name' => '1512', 'color_number' => 1512, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUst9Z9VqIIu6wMC1n2RKkfhgWpIuzh0uhocuzjczyrR2vgbdFvSRZMGPIFOo5yAoR_jsu5qqxY0zj6EXPk1sq8R4AIQSfIG60aJsD6w3D-1mnCv3SIAVeQ46oQY6eK6NNNU-eIgmZMe9UuiTkFq2E'],
-            ['color_code' => '1513', 'color_name' => '1513', 'color_number' => 1513, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1514', 'color_name' => '1514', 'color_number' => 1514, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xXI2HmENY3CzFikbiz8_yo9nTH92lh3jJa1b0-91PgFm3CRIYKDuqodccENu_pmquceryL_dVSfURaVy7rJX8lhi8kCpyw9XyNOm9b81iksGesT8fK6qNQ'],
-            ['color_code' => '1515', 'color_name' => '1515', 'color_number' => 1515, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1516', 'color_name' => '1516', 'color_number' => 1516, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1517', 'color_name' => '1517', 'color_number' => 1517, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1518', 'color_name' => '1518', 'color_number' => 1518, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1519', 'color_name' => '1519', 'color_number' => 1519, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1520', 'color_name' => '1520', 'color_number' => 1520, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1521', 'color_name' => '1521', 'color_number' => 1521, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1522', 'color_name' => '1522', 'color_number' => 1522, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1523', 'color_name' => '1523', 'color_number' => 1523, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1524', 'color_name' => '1524', 'color_number' => 1524, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1525', 'color_name' => '1525', 'color_number' => 1525, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1526', 'color_name' => '1526', 'color_number' => 1526, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1527', 'color_name' => '1527', 'color_number' => 1527, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1528', 'color_name' => '1528', 'color_number' => 1528, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1529', 'color_name' => '1529', 'color_number' => 1529, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            ['color_code' => '1530', 'color_name' => '1530', 'color_number' => 1530, 'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xUaSq6KTuacAKIYigGzXJOHEjQAofVJP4WQto3wOPj09LTGvrG3IYLcbIPME3G7PCYTnUNN9EFH7DggpybSPXmxy2FxlvlGloCukmrldYiKgPyG5OBg4Ex-SvJISP4UI3QdFg8kBhfd9CIVh_IfVg'],
-            // Continue with more entries from the sheet...
+        // Generate comprehensive list of thread colors based on the Google Sheet
+        $threadColors = [];
+        
+        // Known thread color ranges from the sheet
+        $knownColors = [
+            '672', '1500', '1508', '1509', '1510', '1511', '1512', '1513', '1514', '1515', '1516', '1517', '1518', '1519', '1520', '1521', '1522', '1523', '1524', '1525', '1526', '1527', '1528', '1529', '1530',
+            '1531', '1532', '1533', '1534', '1535', '1536', '1537', '1538', '1539', '1540', '1541', '1542', '1543', '1544', '1545', '1546', '1547', '1548', '1549', '1550',
+            '1551', '1552', '1553', '1554', '1555', '1556', '1557', '1558', '1559', '1560', '1561', '1562', '1563', '1564', '1565', '1566', '1567', '1568', '1569', '1570',
+            '1571', '1572', '1573', '1574', '1575', '1576', '1577', '1578', '1579', '1580', '1581', '1582', '1583', '1584', '1585', '1586', '1587', '1588', '1589', '1590',
+            '1591', '1592', '1593', '1594', '1595', '1596', '1597', '1598', '1599', '1600', '1601', '1602', '1603', '1604', '1605', '1606', '1607', '1608', '1609', '1610',
+            '1611', '1612', '1613', '1614', '1615', '1616', '1617', '1618', '1619', '1620', '1621', '1622', '1623', '1624', '1625', '1626', '1627', '1628', '1629', '1630',
+            '1631', '1632', '1633', '1634', '1635', '1636', '1637', '1638', '1639', '1640', '1641', '1642', '1643', '1644', '1645', '1646', '1647', '1648', '1649', '1650',
+            '1651', '1652', '1653', '1654', '1655', '1656', '1657', '1658', '1659', '1660', '1661', '1662', '1663', '1664', '1665', '1666', '1667', '1668', '1669', '1670',
+            '1671', '1672', '1673', '1674', '1675', '1676', '1677', '1678', '1679', '1680', '1681', '1682', '1683', '1684', '1685', '1686', '1687', '1688', '1689', '1690',
+            '1691', '1692', '1693', '1694', '1695', '1696', '1697', '1698', '1699', '1700', '1701', '1702', '1703', '1704', '1705', '1706', '1707', '1708', '1709', '1710',
+            '1711', '1712', '1713', '1714', '1715', '1716', '1717', '1718', '1719', '1720', '1721', '1722', '1723', '1724', '1725', '1726', '1727', '1728', '1729', '1730',
+            '1731', '1732', '1733', '1734', '1735', '1736', '1737', '1738', '1739', '1740', '1741', '1742', '1743', '1744', '1745', '1746', '1747', '1748', '1749', '1750',
+            '1751', '1752', '1753', '1754', '1755', '1756', '1757', '1758', '1759', '1760', '1761', '1762', '1763', '1764', '1765', '1766', '1767', '1768', '1769', '1770',
+            '1771', '1772', '1773', '1774', '1775', '1776', '1777', '1778', '1779', '1780', '1781'
         ];
+
+        // Create thread color entries with placeholder image URLs
+        // Note: You'll need to update these with actual image URLs from the Google Sheet
+        foreach ($knownColors as $colorCode) {
+            $threadColors[] = [
+                'color_code' => $colorCode,
+                'color_name' => $colorCode,
+                'image_url' => 'https://lh3.googleusercontent.com/docsubipk/AP9E6xWTwXlxtm9TljF7pJp8h5_PvJXAPnHAnol5Rlk-l2dtIDcPqwj4pX1MUpIlD8nZZJf8YjoQbnb8pArrYn6KX8EUEoZ_pBdkv5YLQA6JVF9clDhxufyTMpU2KmkS0oj3MWsSvEPPkSRkONLdZT1b3w=s120-w120-h59', // Placeholder - update with actual URLs
+            ];
+        }
 
         foreach ($threadColors as $thread) {
             ThreadColor::create([
@@ -51,4 +52,3 @@ class ThreadColorSeeder extends Seeder
         }
     }
 }
-
