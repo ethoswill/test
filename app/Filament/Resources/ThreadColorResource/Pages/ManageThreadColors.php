@@ -20,6 +20,11 @@ class ManageThreadColors extends ManageRecords
                 ->url('https://drive.google.com/uc?export=download&id=1tC7YLVxove4U8sY589lJzf3jqzYXGIsh')
                 ->openUrlInNewTab()
                 ->tooltip('The colors on the downloaded document might not 100% match the colors that the thread will be in person. For accurate thread colors check in person or download our Domestic Embroidery Thread Color Swatches'),
+            Action::make('downloadDomesticSwatches')
+                ->label('Download Domestic Embroidery Swatches')
+                ->icon('heroicon-o-squares-2x2')
+                ->url('#')
+                ->openUrlInNewTab(),
             Actions\CreateAction::make(),
         ];
     }
