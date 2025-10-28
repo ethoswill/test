@@ -61,3 +61,5 @@ echo "2. Navigate to Products\n";
 echo "3. Click 'Sync from Google Sheets'\n";
 echo "4. Enter your Google Sheet URL and enjoy!\n\n";
 
+
+
