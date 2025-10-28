@@ -26,13 +26,11 @@ class ThreadColorSeeder extends Seeder
             // Continue with more entries from the sheet...
         ];
 
-        foreach ($threadColors as $index => $thread) {
+        foreach ($threadColors as $thread) {
             ThreadColor::create([
                 'color_name' => $thread['color_name'],
                 'color_code' => $thread['color_code'],
                 'image_url' => $thread['image_url'],
-                'sort_order' => $index + 1,
-                'is_active' => true,
             ]);
         }
     }

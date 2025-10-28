@@ -13,8 +13,6 @@ return new class extends Migration
             $table->string('color_name'); // e.g., "672"
             $table->string('color_code'); // Same as color_name - the thread number
             $table->string('image_url')->nullable(); // Image from Google Sheets
-            $table->integer('sort_order')->default(0);
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

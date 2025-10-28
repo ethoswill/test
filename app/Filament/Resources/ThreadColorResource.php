@@ -39,13 +39,6 @@ class ThreadColorResource extends Resource
                     ->label('Image URL')
                     ->url()
                     ->helperText('URL to thread color image from Google Sheets'),
-                Forms\Components\TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0)
-                    ->label('Sort Order'),
-                Forms\Components\Toggle::make('is_active')
-                    ->default(true)
-                    ->label('Active'),
             ]);
     }
 
@@ -65,16 +58,8 @@ class ThreadColorResource extends Resource
                     ->label('Swatch Image')
                     ->circular()
                     ->defaultImageUrl('/images/placeholder.png'),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Active')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Sort')
-                    ->sortable(),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active Status'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -85,7 +70,7 @@ class ThreadColorResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('sort_order');
+            ->defaultSort('color_name');
     }
 
     public static function getRelations(): array
