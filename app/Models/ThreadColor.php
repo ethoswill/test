@@ -10,6 +10,7 @@ class ThreadColor extends Model
         'color_name',
         'color_code',
         'image_url',
+        'used_in',
     ];
 }
 

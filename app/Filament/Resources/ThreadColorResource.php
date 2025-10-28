@@ -39,6 +39,10 @@ class ThreadColorResource extends Resource
                     ->label('Image URL')
                     ->url()
                     ->helperText('URL to thread color image from Google Sheets'),
+                Forms\Components\Textarea::make('used_in')
+                    ->label('Used In')
+                    ->rows(3)
+                    ->helperText('List product colors where this thread is used (e.g., Navy Blue, Black Socks)'),
             ]);
     }
 
@@ -54,6 +58,10 @@ class ThreadColorResource extends Resource
                     ->color('primary'),
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Swatch Image'),
+                Tables\Columns\TextColumn::make('used_in')
+                    ->label('Used In')
+                    ->searchable()
+                    ->limit(50),
             ])
             ->filters([
             ])
