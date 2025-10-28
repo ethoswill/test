@@ -2,16 +2,24 @@
     <div class="space-y-6">
         <!-- Useful Contact Info -->
         <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center mb-6">
-                <div class="flex-shrink-0">
-                    <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h2 class="text-2xl font-bold text-gray-900">Useful Contact Info</h2>
+                        <p class="text-sm text-gray-600 mt-1">Quick access to important contacts for your team</p>
+                    </div>
+                </div>
+                <a href="{{ url('/admin/contact-infos/create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                </div>
-                <div class="ml-3">
-                    <h2 class="text-2xl font-bold text-gray-900">Useful Contact Info</h2>
-                    <p class="text-sm text-gray-600 mt-1">Quick access to important contacts for your team</p>
-                </div>
+                    New Contact Info
+                </a>
             </div>
             
             @if($this->getContactInfo()->count() > 0)
