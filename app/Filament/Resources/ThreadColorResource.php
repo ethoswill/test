@@ -37,6 +37,11 @@ class ThreadColorResource extends Resource
                     ->maxLength(255)
                     ->label('Hex Code')
                     ->helperText('e.g., #FF0000'),
+                Forms\Components\TextInput::make('image_url')
+                    ->maxLength(255)
+                    ->label('Image URL')
+                    ->url()
+                    ->helperText('URL to thread color image'),
                 Forms\Components\TextInput::make('manufacturer')
                     ->maxLength(255)
                     ->label('Manufacturer'),

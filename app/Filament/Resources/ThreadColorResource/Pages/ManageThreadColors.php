@@ -23,7 +23,7 @@ class ManageThreadColors extends ManageRecords
             Action::make('downloadDomesticSwatches')
                 ->label('Download Domestic Embroidery Swatches')
                 ->icon('heroicon-o-squares-2x2')
-                ->url('#')
+                ->url('https://docs.google.com/spreadsheets/d/1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8/edit?usp=sharing')
                 ->openUrlInNewTab(),
             Actions\CreateAction::make(),
         ];

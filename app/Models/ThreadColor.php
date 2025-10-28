@@ -10,6 +10,7 @@ class ThreadColor extends Model
         'color_name',
         'color_code',
         'hex_code',
+        'image_url',
         'manufacturer',
         'thread_type',
         'description',
