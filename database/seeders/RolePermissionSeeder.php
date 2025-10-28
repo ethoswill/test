@@ -16,6 +16,17 @@ class RolePermissionSeeder extends Seeder
     {
         // Create permissions
         $permissions = [
+            // Page view permissions - mapped to navigation items
+            ['name' => 'View CAD Library', 'slug' => 'cad-library.view', 'resource' => 'cad-library', 'action' => 'view'],
+            ['name' => 'View Direct To Film', 'slug' => 'direct-to-film.view', 'resource' => 'direct-to-film', 'action' => 'view'],
+            ['name' => 'View Puff Print', 'slug' => 'puff-print.view', 'resource' => 'puff-print', 'action' => 'view'],
+            ['name' => 'View Bottles', 'slug' => 'bottles.view', 'resource' => 'bottles', 'action' => 'view'],
+            ['name' => 'View Styles', 'slug' => 'styles.view', 'resource' => 'styles', 'action' => 'view'],
+            ['name' => 'View Thread Book Colors', 'slug' => 'thread-colors.view', 'resource' => 'thread-colors', 'action' => 'view'],
+            ['name' => 'View Grips', 'slug' => 'grips.view', 'resource' => 'grips', 'action' => 'view'],
+            ['name' => 'View Packaging', 'slug' => 'packaging.view', 'resource' => 'packaging', 'action' => 'view'],
+            ['name' => 'View Team Members', 'slug' => 'team-members.view', 'resource' => 'team-members', 'action' => 'view'],
+            
             // Product permissions
             ['name' => 'View Products', 'slug' => 'products.view', 'resource' => 'products', 'action' => 'view'],
             ['name' => 'Create Products', 'slug' => 'products.create', 'resource' => 'products', 'action' => 'create'],
@@ -47,7 +58,10 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create($permission);
+            Permission::firstOrCreate(
+                ['slug' => $permission['slug']],
+                $permission
+            );
         }
 
         // Create roles
@@ -63,6 +77,15 @@ class RolePermissionSeeder extends Seeder
                 'slug' => 'admin',
                 'description' => 'Administrative access to products and users',
                 'permissions' => [
+                    'cad-library.view',
+                    'direct-to-film.view',
+                    'puff-print.view',
+                    'bottles.view',
+                    'styles.view',
+                    'thread-colors.view',
+                    'grips.view',
+                    'packaging.view',
+                    'team-members.view',
                     'products.view', 'products.create', 'products.update', 'products.delete', 'products.import',
                     'users.view', 'users.create', 'users.update',
                     'roles.view',
@@ -74,6 +97,14 @@ class RolePermissionSeeder extends Seeder
                 'slug' => 'product-manager',
                 'description' => 'Manage products and import data',
                 'permissions' => [
+                    'cad-library.view',
+                    'direct-to-film.view',
+                    'puff-print.view',
+                    'bottles.view',
+                    'styles.view',
+                    'thread-colors.view',
+                    'grips.view',
+                    'packaging.view',
                     'products.view', 'products.create', 'products.update', 'products.import',
                     'admin.access',
                 ],
@@ -83,6 +114,14 @@ class RolePermissionSeeder extends Seeder
                 'slug' => 'viewer',
                 'description' => 'View-only access to products',
                 'permissions' => [
+                    'cad-library.view',
+                    'direct-to-film.view',
+                    'puff-print.view',
+                    'bottles.view',
+                    'styles.view',
+                    'thread-colors.view',
+                    'grips.view',
+                    'packaging.view',
                     'products.view',
                     'admin.access',
                 ],
@@ -93,7 +132,10 @@ class RolePermissionSeeder extends Seeder
             $permissions = $roleData['permissions'];
             unset($roleData['permissions']);
             
-            $role = Role::create($roleData);
+            $role = Role::firstOrCreate(
+                ['slug' => $roleData['slug']],
+                $roleData
+            );
             
             // Assign permissions to role
             $permissionIds = Permission::whereIn('slug', $permissions)->pluck('id');

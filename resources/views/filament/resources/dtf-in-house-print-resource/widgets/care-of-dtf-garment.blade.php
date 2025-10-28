@@ -2,7 +2,7 @@
     <x-filament::section collapsed>
         <x-slot name="heading">
             <div class="flex items-center justify-between w-full">
-                <span>DTF File Types</span>
+                <span>Care of DTF Garment</span>
                 <div class="flex gap-2">
                     @if($this->showForm)
                         <x-filament::button wire:click="saveContent" color="success" size="sm">
@@ -27,7 +27,7 @@
                         wire:model="content" 
                         rows="10" 
                         class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                        placeholder="Enter your file types information here... (Supports HTML formatting)"
+                        placeholder="Enter care instructions here... (Supports HTML formatting)"
                     ></textarea>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         💡 Tip: Use HTML tags for formatting: <code class="text-xs bg-gray-200 dark:bg-gray-700 px-1 rounded">&lt;b&gt;bold&lt;/b&gt;</code>, <code class="text-xs bg-gray-200 dark:bg-gray-700 px-1 rounded">&lt;i&gt;italic&lt;/i&gt;</code>, <code class="text-xs bg-gray-200 dark:bg-gray-700 px-1 rounded">&lt;u&gt;underline&lt;/u&gt;</code>, <code class="text-xs bg-gray-200 dark:bg-gray-700 px-1 rounded">&lt;a href="url"&gt;link&lt;/a&gt;</code>

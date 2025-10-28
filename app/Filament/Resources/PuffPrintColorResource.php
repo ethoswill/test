@@ -18,7 +18,7 @@ class PuffPrintColorResource extends Resource
     protected static ?string $model = PuffPrintColor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-swatch';
-    protected static ?string $navigationLabel = 'Puff Print Color Options';
+    protected static ?string $navigationLabel = 'Puff Print';
     protected static ?string $modelLabel = 'Puff Print Color';
     protected static ?string $pluralModelLabel = 'Puff Print Colors';
     protected static ?string $navigationGroup = 'In House Print';

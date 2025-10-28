@@ -79,19 +79,20 @@ class UserResource extends Resource
                         Forms\Components\CheckboxList::make('permissions')
                             ->label('Individual Permissions')
                             ->options(function () {
-                                return Permission::all()->mapWithKeys(function ($permission) {
-                                    return [$permission->slug => $permission->name . ' (' . $permission->resource . ')'];
+                                $permissions = Permission::all()->sortBy('resource');
+                                return $permissions->mapWithKeys(function ($permission) {
+                                    return [$permission->slug => $permission->name];
                                 });
                             })
-                            ->columns(2)
-                            ->gridDirection('row')
                             ->descriptions(function () {
                                 $descriptions = [];
                                 foreach (Permission::all() as $permission) {
-                                    $descriptions[$permission->slug] = $permission->description;
+                                    $descriptions[$permission->slug] = $permission->resource;
                                 }
                                 return $descriptions;
-                            }),
+                            })
+                            ->columns(2)
+                            ->searchable(),
                     ])
                     ->collapsible(),
             ]);
@@ -184,6 +185,7 @@ class UserResource extends Resource
                     ])
                     ->action(function (array $data) {
                         $user = User::create([
+                            'name' => trim($data['first_name'] . ' ' . $data['last_name']),
                             'first_name' => $data['first_name'],
                             'last_name' => $data['last_name'],
                             'email' => $data['email'],

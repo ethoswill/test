@@ -5,13 +5,13 @@ namespace App\Filament\Resources\DtfInHousePrintResource\Widgets;
 use App\Models\DtfWidgetContent;
 use Filament\Widgets\Widget;
 
-class FileTypes extends Widget
+class CareOfDtfGarment extends Widget
 {
-    protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.file-types';
+    protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.care-of-dtf-garment';
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 8;
     
     protected static bool $isLazy = false;
 
@@ -21,7 +21,7 @@ class FileTypes extends Widget
     public function mount(): void
     {
         $widget = DtfWidgetContent::firstOrCreate(
-            ['widget_name' => 'file_types'],
+            ['widget_name' => 'care_of_dtf_garment'],
             ['content' => '']
         );
         
@@ -35,7 +35,7 @@ class FileTypes extends Widget
 
     public function saveContent(): void
     {
-        $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'file_types']);
+        $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'care_of_dtf_garment']);
         $widget->content = $this->content;
         $widget->save();
 
