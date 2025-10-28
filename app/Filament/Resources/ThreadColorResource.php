@@ -55,9 +55,7 @@ class ThreadColorResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('image_url')
-                    ->label('Swatch Image')
-                    ->circular()
-                    ->defaultImageUrl('/images/placeholder.png'),
+                    ->label('Swatch Image'),
             ])
             ->filters([
             ])
