@@ -10,14 +10,9 @@ return new class extends Migration
     {
         Schema::create('thread_colors', function (Blueprint $table) {
             $table->id();
-            $table->string('color_name');
-            $table->string('color_code')->nullable();
-            $table->string('hex_code')->nullable();
-            $table->string('manufacturer')->nullable();
-            $table->string('thread_type')->nullable();
-            $table->text('description')->nullable();
-            $table->string('availability')->nullable();
-            $table->text('usage_notes')->nullable();
+            $table->string('color_name'); // e.g., "672"
+            $table->string('color_code'); // Same as color_name - the thread number
+            $table->string('image_url')->nullable(); // Image from Google Sheets
             $table->integer('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

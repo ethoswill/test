@@ -9,13 +9,7 @@ class ThreadColor extends Model
     protected $fillable = [
         'color_name',
         'color_code',
-        'hex_code',
         'image_url',
-        'manufacturer',
-        'thread_type',
-        'description',
-        'availability',
-        'usage_notes',
         'sort_order',
         'is_active',
     ];

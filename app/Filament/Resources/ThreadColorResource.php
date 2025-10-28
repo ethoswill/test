@@ -29,36 +29,16 @@ class ThreadColorResource extends Resource
                 Forms\Components\TextInput::make('color_name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Color Name'),
+                    ->label('Thread Number'),
                 Forms\Components\TextInput::make('color_code')
+                    ->required()
                     ->maxLength(255)
                     ->label('Color Code'),
-                Forms\Components\TextInput::make('hex_code')
-                    ->maxLength(255)
-                    ->label('Hex Code')
-                    ->helperText('e.g., #FF0000'),
                 Forms\Components\TextInput::make('image_url')
                     ->maxLength(255)
                     ->label('Image URL')
                     ->url()
-                    ->helperText('URL to thread color image'),
-                Forms\Components\TextInput::make('manufacturer')
-                    ->maxLength(255)
-                    ->label('Manufacturer'),
-                Forms\Components\TextInput::make('thread_type')
-                    ->maxLength(255)
-                    ->label('Thread Type'),
-                Forms\Components\Textarea::make('description')
-                    ->rows(3)
-                    ->maxLength(1000)
-                    ->label('Description'),
-                Forms\Components\TextInput::make('availability')
-                    ->maxLength(255)
-                    ->label('Availability'),
-                Forms\Components\Textarea::make('usage_notes')
-                    ->rows(3)
-                    ->maxLength(500)
-                    ->label('Usage Notes'),
+                    ->helperText('URL to thread color image from Google Sheets'),
                 Forms\Components\TextInput::make('sort_order')
                     ->numeric()
                     ->default(0)
@@ -74,20 +54,22 @@ class ThreadColorResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('color_name')
+                    ->label('Thread Number')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('color_code')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('hex_code'),
-                Tables\Columns\TextColumn::make('manufacturer')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('thread_type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('availability')
-                    ->searchable(),
+                    ->label('Color Code')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\ImageColumn::make('image_url')
+                    ->label('Swatch Image')
+                    ->circular()
+                    ->defaultImageUrl('/images/placeholder.png'),
                 Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('sort_order')
+                    ->label('Sort')
                     ->sortable(),
             ])
             ->filters([
