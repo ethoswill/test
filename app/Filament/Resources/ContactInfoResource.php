@@ -27,7 +27,19 @@ class ContactInfoResource extends Resource
     
     protected static ?int $navigationSort = 0;
 
-    protected static ?string $modelLabel = 'Contact Information';
+    protected static ?string $modelLabel = 'Contact Info';
+    
+    protected static ?string $pluralModelLabel = 'Contact Info';
+    
+    public static function getModelLabel(): string
+    {
+        return 'Contact Info';
+    }
+    
+    public static function getPluralModelLabel(): string
+    {
+        return 'Contact Info';
+    }
 
     public static function form(Form $form): Form
     {
