@@ -22,7 +22,7 @@ class SockResource extends Resource
     protected static ?string $modelLabel = 'Sock';
     protected static ?string $pluralModelLabel = 'Socks';
     protected static ?string $navigationGroup = 'Socks';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 0;
 
     public static function form(Form $form): Form
     {
@@ -89,23 +89,16 @@ class SockResource extends Resource
                     ->color('primary'),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Bullet Points')
-                    ->limit(100)
-                    ->wrap()
+                    ->wrap(false)
                     ->formatStateUsing(function (string $state): string {
-                        // Split by line breaks and format each point
+                        // Split by line breaks and format each point with bullets
                         $lines = array_filter(array_map('trim', explode("\n", $state)));
-                        return implode("\n• ", array_map(function($line) {
+                        return implode("<br>• ", array_map(function($line) {
                             // Remove existing bullets/dashes and add clean bullet
                             return ltrim($line, '• -');
                         }, $lines));
                     })
-                    ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
-                        $state = $column->getState();
-                        if (strlen($state) <= 100) {
-                            return null;
-                        }
-                        return $state;
-                    }),
+                    ->html(),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -130,11 +123,7 @@ class SockResource extends Resource
             ->actions([
                 // No actions - clicking the sock style name will navigate to view page
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
+            ->checkIfRecordIsSelectableUsing(fn () => false)
             ->defaultSort('name', 'asc')
             ->paginated(false); // Show all socks on one page for info sheet feel
     }

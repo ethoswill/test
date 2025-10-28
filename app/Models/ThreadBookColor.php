@@ -13,6 +13,7 @@ class ThreadBookColor extends Model
         'name',
         'color_code',
         'hex_code',
+        'image_url',
         'color_category',
         'description',
         'is_active',

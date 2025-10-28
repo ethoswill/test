@@ -119,11 +119,7 @@ class BottleResource extends Resource
             ->actions([
                 // No actions - clicking the bottle style name will navigate to view page
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
+            ->checkIfRecordIsSelectableUsing(fn () => false)
             ->defaultSort('name', 'asc')
             ->paginated(false); // Show all bottles on one page
     }

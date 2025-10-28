@@ -82,11 +82,7 @@ class PuffPrintColorResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
+            ->checkIfRecordIsSelectableUsing(fn () => false)
             ->defaultSort('name', 'asc');
     }
 

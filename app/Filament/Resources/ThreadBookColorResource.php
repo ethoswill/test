@@ -44,6 +44,12 @@ class ThreadBookColorResource extends Resource
                             ->maxLength(255)
                             ->placeholder('e.g., 000000, FFFFFF')
                             ->helperText('Enter the hex code without the # symbol'),
+                        Forms\Components\TextInput::make('image_url')
+                            ->label('Image URL')
+                            ->maxLength(255)
+                            ->url()
+                            ->placeholder('e.g., https://example.com/image.jpg')
+                            ->helperText('Enter the full URL to the color swatch image (4:5 ratio recommended)'),
                         Forms\Components\Select::make('color_category')
                             ->label('Color Category')
                             ->options([
@@ -76,6 +82,12 @@ class ThreadBookColorResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('image_url')
+                    ->label('Color')
+                    ->state(fn (ThreadBookColor $record): ?string => $record->image_url ?: "https://via.placeholder.com/100/{$record->hex_code}/{$record->hex_code}?text=")
+                    ->url(fn (ThreadBookColor $record): ?string => $record->image_url ?: "https://via.placeholder.com/100/{$record->hex_code}/{$record->hex_code}?text=")
+                    ->width('100px')
+                    ->height('125px'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Color Name')
                     ->searchable()
@@ -95,7 +107,8 @@ class ThreadBookColorResource extends Resource
                     ->label('Color Category')
                     ->searchable()
                     ->badge()
-                    ->color('success'),
+                    ->color('gray')
+                    ->formatStateUsing(fn ($state) => $state ? ucfirst($state) : ''),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('color_category')
@@ -121,11 +134,7 @@ class ThreadBookColorResource extends Resource
             ->actions([
                 // No actions - clicking the color name will navigate to view page
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->checkIfRecordIsSelectableUsing(fn () => false);
     }
 
     public static function getRelations(): array
