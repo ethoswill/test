@@ -50,10 +50,6 @@ class ThreadColorResource extends Resource
                     ->label('Thread Number')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('color_code')
-                    ->label('Color Code')
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Swatch Image'),
             ])
