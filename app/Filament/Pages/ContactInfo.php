@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\ContactInfo as ContactInfoModel;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 
 class ContactInfo extends Page
@@ -16,6 +17,18 @@ class ContactInfo extends Page
     protected static ?int $navigationSort = 1;
 
     protected static string $view = 'filament.pages.contact-info';
+    
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('new_contact_info')
+                ->label('New Contact Info')
+                ->icon('heroicon-o-plus')
+                ->url(url('/admin/contact-infos/create'))
+                ->color('primary')
+                ->button(),
+        ];
+    }
     
     public function getTitle(): string
     {
