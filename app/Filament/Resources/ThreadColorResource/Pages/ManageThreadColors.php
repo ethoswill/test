@@ -17,7 +17,7 @@ class ManageThreadColors extends ManageRecords
             Action::make('downloadThreadColors')
                 ->label('Download Thread Colors')
                 ->icon('heroicon-o-arrow-down-tray')
-                ->url('https://drive.google.com/file/d/1tC7YLVxove4U8sY589lJzf3jqzYXGIsh/view?usp=sharing')
+                ->url('https://drive.google.com/uc?export=download&id=1tC7YLVxove4U8sY589lJzf3jqzYXGIsh')
                 ->openUrlInNewTab(),
             Actions\CreateAction::make(),
         ];
