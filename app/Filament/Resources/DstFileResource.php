@@ -20,7 +20,7 @@ class DstFileResource extends Resource
 
     protected static ?string $navigationGroup = 'Embroidery';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
