@@ -18,7 +18,7 @@ class ThreadColorResource extends Resource
 
     protected static ?string $navigationLabel = 'Thread Colors';
 
-    protected static ?string $navigationGroup = 'Embroidery';
+    protected static ?string $navigationGroup = 'In House Print';
 
     protected static ?int $navigationSort = 2;
 

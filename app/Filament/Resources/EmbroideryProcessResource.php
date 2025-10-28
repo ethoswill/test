@@ -18,7 +18,7 @@ class EmbroideryProcessResource extends Resource
 
     protected static ?string $navigationLabel = 'Embroidery Process';
 
-    protected static ?string $navigationGroup = 'Embroidery';
+    protected static ?string $navigationGroup = 'In House Print';
 
     protected static ?int $navigationSort = 1;
 
