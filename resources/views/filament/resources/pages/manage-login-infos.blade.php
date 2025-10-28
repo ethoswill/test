@@ -17,10 +17,26 @@
                     <div class="flex-1">
                         <h3 class="text-lg font-semibold text-gray-900">{{ $loginInfo->website_name }}</h3>
                         @if($loginInfo->url)
-                            <p class="text-sm text-blue-600 mt-1">{{ $loginInfo->url }}</p>
+                            <div class="mt-2">
+                                <a href="{{ $loginInfo->url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                                    {{ $loginInfo->url }}
+                                    <svg class="inline-block h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
+                            </div>
                         @endif
                         @if($loginInfo->username)
-                            <p class="text-sm font-medium text-gray-600 mt-1">{{ $loginInfo->username }}</p>
+                            <div class="flex items-center mt-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-3 w-20">Email:</span>
+                                <p class="text-sm font-medium text-gray-900">{{ $loginInfo->username }}</p>
+                            </div>
+                        @endif
+                        @if($loginInfo->password)
+                            <div class="flex items-center mt-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-3 w-20">Password:</span>
+                                <p class="text-sm font-medium text-gray-900 font-mono">{{ $loginInfo->password }}</p>
+                            </div>
                         @endif
                     </div>
                     <div class="flex items-center gap-2 ml-4">
@@ -44,25 +60,16 @@
                     class="border-t border-gray-200"
                 >
                     <div class="p-6 pt-4">
-                        <div class="space-y-4">
-                            @if($loginInfo->password)
-                                <div class="flex bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <div class="flex-1">
-                                        <h4 class="text-sm font-medium text-gray-700 mb-2">Password</h4>
-                                        <span class="text-base text-gray-900 font-mono">{{ $loginInfo->password }}</span>
-                                    </div>
+                        @if($loginInfo->description)
+                            <div class="flex bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Notes</h4>
+                                    <span class="text-base text-gray-900 leading-relaxed block">{{ $loginInfo->description }}</span>
                                 </div>
-                            @endif
-                            
-                            @if($loginInfo->description)
-                                <div class="flex bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <div class="flex-1">
-                                        <h4 class="text-sm font-medium text-gray-700 mb-2">Notes</h4>
-                                        <span class="text-base text-gray-900 leading-relaxed block">{{ $loginInfo->description }}</span>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
+                            </div>
+                        @else
+                            <p class="text-sm text-gray-500 italic">No additional notes.</p>
+                        @endif
                     </div>
                 </div>
             </div>
