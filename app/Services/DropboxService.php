@@ -157,12 +157,17 @@ class DropboxService
         // Examples:
         // https://www.dropbox.com/scl/fi/abc123/folder-name?dl=0&st=xyz
         // https://www.dropbox.com/sh/abc123/xyz
+        // https://www.dropbox.com/scl/fo/abc123/folder-name?rlkey=xyz&st=abc&dl=0
         
         if (preg_match('/dropbox\.com\/sh\/([a-zA-Z0-9]+)/', $url, $matches)) {
             return '/' . $matches[1];
         }
         
         if (preg_match('/dropbox\.com\/scl\/fi\/([a-zA-Z0-9]+)/', $url, $matches)) {
+            return '/' . $matches[1];
+        }
+        
+        if (preg_match('/dropbox\.com\/scl\/fo\/([a-zA-Z0-9]+)/', $url, $matches)) {
             return '/' . $matches[1];
         }
         
