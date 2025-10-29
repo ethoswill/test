@@ -8,7 +8,7 @@ use Filament\Resources\Pages\ManageRecords;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use App\Services\GoogleSheetsService;
-use App\Services\GoogleDriveService;
+use App\Services\GoogleDriveImageService;
 use App\Models\ThreadColor;
 use Filament\Forms;
 
@@ -34,19 +34,8 @@ class ManageThreadColors extends ManageRecords
                 ])
                 ->action(function (array $data) {
                     try {
-                        $googleDriveService = new GoogleDriveService();
-                        $folderId = $googleDriveService->extractFolderIdFromUrl($data['google_drive_folder_url']);
-                        
-                        if (!$folderId) {
-                            Notification::make()
-                                ->title('Invalid URL')
-                                ->body('Could not extract folder ID from the provided URL')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
-                        
-                        $result = $googleDriveService->testConnection($folderId);
+                        $googleDriveImageService = new GoogleDriveImageService();
+                        $result = $googleDriveImageService->testConnection();
                         
                         if ($result['success']) {
                             Notification::make()
@@ -92,19 +81,8 @@ class ManageThreadColors extends ManageRecords
                     try {
                         set_time_limit(300); // 5 minutes
                         
-                        $googleDriveService = new GoogleDriveService();
+                        $googleDriveImageService = new GoogleDriveImageService();
                         $googleSheetsService = new GoogleSheetsService();
-                        
-                        // Extract folder ID
-                        $folderId = $googleDriveService->extractFolderIdFromUrl($data['google_drive_folder_url']);
-                        if (!$folderId) {
-                            Notification::make()
-                                ->title('Invalid URL')
-                                ->body('Could not extract folder ID from the provided URL')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
                         
                         // Get thread colors from Google Sheets
                         $spreadsheetId = '1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8';
@@ -131,7 +109,7 @@ class ManageThreadColors extends ManageRecords
                         
                         foreach ($threadColors as $threadColor) {
                             // Try to get image from Google Drive
-                            $imagePath = $googleDriveService->downloadAndStoreImage($folderId, $threadColor['color_code']);
+                            $imagePath = $googleDriveImageService->downloadAndStoreImage($threadColor['color_code']);
                             
                             if ($imagePath) {
                                 $threadColor['image_url'] = $imagePath;
