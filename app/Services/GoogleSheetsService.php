@@ -288,4 +288,21 @@ class GoogleSheetsService
         
         return null;
     }
+
+    public function readSheet($spreadsheetId, $range = 'A:Z')
+    {
+        try {
+            $response = $this->sheetsService->spreadsheets_values->get($spreadsheetId, $range);
+            $values = $response->getValues();
+
+            if (empty($values)) {
+                return [];
+            }
+
+            return $values;
+        } catch (\Exception $e) {
+            Log::error('Error reading sheet: ' . $e->getMessage());
+            throw $e;
+        }
+    }
 }
