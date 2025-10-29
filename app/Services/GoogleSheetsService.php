@@ -43,12 +43,15 @@ class GoogleSheetsService
             foreach ($values as $row) {
                 if (count($row) >= 1) {
                     $colorCode = $row[0];
-                    $imageUrl = isset($row[1]) ? $row[1] : null;
+                    
+                    // For now, we'll use placeholder images since Google Sheets API doesn't provide direct image URLs
+                    // The images in Google Sheets are embedded and not accessible via API
+                    $imageUrl = 'https://via.placeholder.com/120x59/cccccc/000000?text=' . $colorCode;
                     
                     $threadColors[] = [
                         'color_name' => $colorCode,
                         'color_code' => $colorCode,
-                        'image_url' => $imageUrl ?: 'https://via.placeholder.com/120x59?text=' . $colorCode,
+                        'image_url' => $imageUrl,
                     ];
                 }
             }

@@ -50,8 +50,8 @@ class ManageThreadColors extends ManageRecords
                     }
                 })
                 ->tooltip('Test connection to Google Sheets'),
-            Action::make('importFromGoogleSheets')
-                ->label('Import from Google Sheets')
+            Action::make('importWithPlaceholderImages')
+                ->label('Import Thread Colors (with placeholder images)')
                 ->icon('heroicon-o-cloud-arrow-down')
                 ->color('success')
                 ->action(function () {
@@ -82,7 +82,7 @@ class ManageThreadColors extends ManageRecords
 
                         Notification::make()
                             ->title('Import Successful!')
-                            ->body("Imported {$imported} thread colors from Google Sheets")
+                            ->body("Imported {$imported} thread colors. Note: Images are placeholders since Google Sheets API cannot access embedded images directly.")
                             ->success()
                             ->send();
 
@@ -94,7 +94,7 @@ class ManageThreadColors extends ManageRecords
                             ->send();
                     }
                 })
-                ->tooltip('Import all thread colors with image URLs from Google Sheets'),
+                ->tooltip('Import thread colors with placeholder images (Google Sheets API limitation)'),
             Action::make('downloadThreadColors')
                 ->label('Download Thread Colors')
                 ->icon('heroicon-o-arrow-down-tray')
