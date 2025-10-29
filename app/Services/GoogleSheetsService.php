@@ -277,4 +277,15 @@ class GoogleSheetsService
             ];
         }
     }
+
+    public function extractSpreadsheetId($url)
+    {
+        // Extract spreadsheet ID from Google Sheets URL
+        // URL format: https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit...
+        if (preg_match('/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        
+        return null;
+    }
 }
