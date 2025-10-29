@@ -85,8 +85,8 @@ class ManageThreadColors extends ManageRecords
                     Forms\Components\TextInput::make('limit')
                         ->label('Limit (optional)')
                         ->numeric()
-                        ->default(50)
-                        ->helperText('Number of thread colors to process (default: 50)')
+                        ->default(10)
+                        ->helperText('Number of thread colors to process (default: 10 to prevent timeout)')
                 ])
                 ->action(function (array $data) {
                     try {
@@ -120,7 +120,7 @@ class ManageThreadColors extends ManageRecords
                         }
 
                         // Limit processing
-                        $limit = $data['limit'] ?? 50;
+                        $limit = $data['limit'] ?? 10;
                         $threadColors = array_slice($threadColors, 0, $limit);
 
                         // Clear existing data
@@ -128,26 +128,44 @@ class ManageThreadColors extends ManageRecords
 
                         $imported = 0;
                         $downloadedCount = 0;
+                        $errors = [];
                         
-                        foreach ($threadColors as $threadColor) {
-                            // Try to get image from Google Drive
-                            $imagePath = $googleDriveService->downloadAndStoreImage($folderId, $threadColor['color_code']);
-                            
-                            if ($imagePath) {
-                                $threadColor['image_url'] = $imagePath;
-                                $downloadedCount++;
-                            }
+                        foreach ($threadColors as $index => $threadColor) {
+                            try {
+                                // Try to get image from Google Drive
+                                $imagePath = $googleDriveService->downloadAndStoreImage($folderId, $threadColor['color_code']);
+                                
+                                if ($imagePath) {
+                                    $threadColor['image_url'] = $imagePath;
+                                    $downloadedCount++;
+                                } else {
+                                    // Use placeholder if no image found
+                                    $threadColor['image_url'] = "https://via.placeholder.com/120x59/cccccc/000000?text={$threadColor['color_code']}";
+                                }
 
-                            ThreadColor::create($threadColor);
-                            $imported++;
-                            
-                            // Small delay to prevent rate limiting
-                            usleep(100000); // 0.1 second
+                                ThreadColor::create($threadColor);
+                                $imported++;
+                                
+                                // Small delay to prevent rate limiting
+                                usleep(200000); // 0.2 second delay
+                                
+                            } catch (\Exception $e) {
+                                $errors[] = "Thread {$threadColor['color_code']}: " . $e->getMessage();
+                                // Still create the thread color with placeholder
+                                $threadColor['image_url'] = "https://via.placeholder.com/120x59/cccccc/000000?text={$threadColor['color_code']}";
+                                ThreadColor::create($threadColor);
+                                $imported++;
+                            }
+                        }
+
+                        $message = "Imported {$imported} thread colors. Downloaded {$downloadedCount} images from Google Drive!";
+                        if (!empty($errors)) {
+                            $message .= " Errors: " . count($errors) . " items had issues.";
                         }
 
                         Notification::make()
                             ->title('Import Successful!')
-                            ->body("Imported {$imported} thread colors. Downloaded {$downloadedCount} images from Google Drive!")
+                            ->body($message)
                             ->success()
                             ->send();
 
