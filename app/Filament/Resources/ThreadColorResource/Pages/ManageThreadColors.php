@@ -112,18 +112,22 @@ class ManageThreadColors extends ManageRecords
                 })
                 ->tooltip('Test connection to Google Sheets'),
             Action::make('importWithRealImages')
-                ->label('Import with Real Images from Google Sheets')
+                ->label('Import with Real Images (First 50)')
                 ->icon('heroicon-o-cloud-arrow-down')
                 ->color('success')
                 ->action(function () {
                     try {
+                        // Increase PHP execution time
+                        set_time_limit(300); // 5 minutes
+                        
                         $googleSheetsService = new GoogleSheetsService();
                         $spreadsheetId = '1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8';
                         
-                        // Try to get images from Google Sheets
-                        $result = $googleSheetsService->downloadAndStoreImages($spreadsheetId, 'Madeira Swatches!A:B');
+                        // Process only first 50 to avoid timeout
+                        $result = $googleSheetsService->downloadAndStoreImages($spreadsheetId, 'Madeira Swatches!A:B', 50);
                         $threadColors = $result['threadColors'];
                         $downloadedCount = $result['downloadedCount'];
+                        $processedCount = $result['processedCount'];
                         
                         if (empty($threadColors)) {
                             Notification::make()
@@ -146,7 +150,7 @@ class ManageThreadColors extends ManageRecords
 
                         Notification::make()
                             ->title('Import Successful!')
-                            ->body("Imported {$imported} thread colors. Downloaded {$downloadedCount} real images from Google Sheets!")
+                            ->body("Imported {$imported} thread colors. Processed {$processedCount} images, downloaded {$downloadedCount} real images from Google Sheets!")
                             ->success()
                             ->send();
 
@@ -158,7 +162,7 @@ class ManageThreadColors extends ManageRecords
                             ->send();
                     }
                 })
-                ->tooltip('Import thread colors and download real images from Google Sheets'),
+                ->tooltip('Import first 50 thread colors and download real images (prevents timeout)'),
             Action::make('downloadThreadColors')
                 ->label('Download Thread Colors')
                 ->icon('heroicon-o-arrow-down-tray')

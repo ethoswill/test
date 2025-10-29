@@ -109,36 +109,117 @@ class GoogleSheetsService
         }
     }
 
-    public function downloadAndStoreImages($spreadsheetId, $range = 'Madeira Swatches!A:B')
+    public function downloadAndStoreImages($spreadsheetId, $range = 'Madeira Swatches!A:B', $limit = 50)
     {
         try {
-            $threadColors = $this->getThreadColorsWithImages($spreadsheetId, $range);
+            // Increase execution time limit
+            set_time_limit(300); // 5 minutes
+            
+            $threadColors = $this->getThreadColorsFromSheet($spreadsheetId, $range);
             $downloadedCount = 0;
+            $processedCount = 0;
 
             foreach ($threadColors as $threadColor) {
-                if ($threadColor['image_url'] && strpos($threadColor['image_url'], 'placeholder') === false) {
-                    // Download and store the image
-                    $imageContent = file_get_contents($threadColor['image_url']);
-                    if ($imageContent) {
-                        $filename = $threadColor['color_code'] . '.jpg';
-                        $path = 'thread-colors/' . $filename;
-                        
-                        Storage::disk('public')->put($path, $imageContent);
-                        
-                        // Update the thread color with local path
-                        $threadColor['image_url'] = $path;
-                        $downloadedCount++;
+                if ($processedCount >= $limit) {
+                    break; // Stop after processing limit
+                }
+                
+                try {
+                    // Try to get real image URL for this specific thread color
+                    $realImageUrl = $this->getImageForThreadColor($spreadsheetId, $threadColor['color_code']);
+                    
+                    if ($realImageUrl && strpos($realImageUrl, 'placeholder') === false) {
+                        // Download and store the image
+                        $imageContent = @file_get_contents($realImageUrl);
+                        if ($imageContent) {
+                            $filename = $threadColor['color_code'] . '.jpg';
+                            $path = 'thread-colors/' . $filename;
+                            
+                            Storage::disk('public')->put($path, $imageContent);
+                            
+                            // Update the thread color with local path
+                            $threadColor['image_url'] = $path;
+                            $downloadedCount++;
+                        }
                     }
+                    
+                    $processedCount++;
+                    
+                    // Add small delay to prevent rate limiting
+                    usleep(100000); // 0.1 second delay
+                    
+                } catch (\Exception $e) {
+                    Log::error("Error processing thread color {$threadColor['color_code']}: " . $e->getMessage());
+                    continue;
                 }
             }
 
             return [
                 'threadColors' => $threadColors,
-                'downloadedCount' => $downloadedCount
+                'downloadedCount' => $downloadedCount,
+                'processedCount' => $processedCount
             ];
         } catch (\Exception $e) {
             Log::error('Error downloading images: ' . $e->getMessage());
             throw $e;
+        }
+    }
+
+    private function getImageForThreadColor($spreadsheetId, $colorCode)
+    {
+        try {
+            // Get a smaller range to find the specific thread color
+            $response = $this->sheetsService->spreadsheets_values->get($spreadsheetId, 'Madeira Swatches!A:B');
+            $values = $response->getValues();
+            
+            if (empty($values)) {
+                return null;
+            }
+            
+            // Find the row with this color code
+            $targetRow = null;
+            foreach ($values as $index => $row) {
+                if (isset($row[0]) && $row[0] == $colorCode) {
+                    $targetRow = $index + 1; // +1 because arrays are 0-indexed but sheets are 1-indexed
+                    break;
+                }
+            }
+            
+            if (!$targetRow) {
+                return null;
+            }
+            
+            // Get the spreadsheet with grid data for this specific row
+            $spreadsheet = $this->sheetsService->spreadsheets->get($spreadsheetId, [
+                'includeGridData' => true,
+                'ranges' => ["Madeira Swatches!B{$targetRow}:B{$targetRow}"]
+            ]);
+
+            $sheet = $spreadsheet->getSheets()[0];
+            $gridData = $sheet->getData()[0];
+            
+            if (isset($gridData['rowData'][0]['values'][0])) {
+                $cellData = $gridData['rowData'][0]['values'][0];
+                
+                // Check if cell has an image formula
+                if (isset($cellData['userEnteredValue']['formulaValue'])) {
+                    $formula = $cellData['userEnteredValue']['formulaValue'];
+                    
+                    // Look for IMAGE formula
+                    if (strpos($formula, 'IMAGE(') !== false) {
+                        // Extract URL from IMAGE formula
+                        preg_match('/IMAGE\("([^"]+)"/', $formula, $matches);
+                        if (isset($matches[1])) {
+                            return $matches[1];
+                        }
+                    }
+                }
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error("Error getting image for thread color {$colorCode}: " . $e->getMessage());
+            return null;
         }
     }
 
