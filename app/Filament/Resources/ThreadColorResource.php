@@ -34,11 +34,22 @@ class ThreadColorResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Color Code'),
-                Forms\Components\TextInput::make('image_url')
-                    ->maxLength(255)
-                    ->label('Image URL')
-                    ->url()
-                    ->helperText('URL to thread color image from Google Sheets'),
+                Forms\Components\FileUpload::make('image_url')
+                    ->label('Thread Color Image')
+                    ->image()
+                    ->directory('thread-colors')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(2048) // 2MB max
+                    ->helperText('Upload a clear image of the thread color swatch')
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '16:9',
+                        '4:3',
+                        '1:1',
+                    ])
+                    ->imageResizeTargetWidth(300)
+                    ->imageResizeTargetHeight(200),
                 Forms\Components\Textarea::make('used_in')
                     ->label('Used In')
                     ->rows(3)

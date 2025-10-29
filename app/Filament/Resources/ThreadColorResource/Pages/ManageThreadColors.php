@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use App\Services\GoogleSheetsService;
 use App\Models\ThreadColor;
+use Filament\Forms;
 
 class ManageThreadColors extends ManageRecords
 {
@@ -17,6 +18,66 @@ class ManageThreadColors extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('bulkUploadImages')
+                ->label('Bulk Upload Images')
+                ->icon('heroicon-o-photo')
+                ->color('warning')
+                ->form([
+                    Forms\Components\FileUpload::make('images')
+                        ->label('Thread Color Images')
+                        ->multiple()
+                        ->image()
+                        ->directory('thread-colors')
+                        ->visibility('public')
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->maxSize(2048)
+                        ->helperText('Upload multiple thread color images. Name files with thread numbers (e.g., 1500.jpg, 1508.png)')
+                        ->required()
+                ])
+                ->action(function (array $data) {
+                    try {
+                        $uploadedCount = 0;
+                        $updatedCount = 0;
+                        
+                        foreach ($data['images'] as $imagePath) {
+                            // Extract thread number from filename
+                            $filename = basename($imagePath);
+                            $threadNumber = pathinfo($filename, PATHINFO_FILENAME);
+                            
+                            // Find matching thread color by number
+                            $threadColor = ThreadColor::where('color_name', $threadNumber)
+                                ->orWhere('color_code', $threadNumber)
+                                ->first();
+                            
+                            if ($threadColor) {
+                                $threadColor->update(['image_url' => $imagePath]);
+                                $updatedCount++;
+                            } else {
+                                // Create new thread color if not found
+                                ThreadColor::create([
+                                    'color_name' => $threadNumber,
+                                    'color_code' => $threadNumber,
+                                    'image_url' => $imagePath,
+                                ]);
+                                $uploadedCount++;
+                            }
+                        }
+                        
+                        Notification::make()
+                            ->title('Bulk Upload Successful!')
+                            ->body("Updated {$updatedCount} existing thread colors and created {$uploadedCount} new ones.")
+                            ->success()
+                            ->send();
+                            
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Upload Failed')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->tooltip('Upload multiple thread color images at once. Name files with thread numbers.'),
             Action::make('testGoogleSheetsConnection')
                 ->label('Test Google Sheets Connection')
                 ->icon('heroicon-o-link')
