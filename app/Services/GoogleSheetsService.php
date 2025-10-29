@@ -9,205 +9,99 @@ use Illuminate\Support\Facades\Log;
 
 class GoogleSheetsService
 {
-    protected $client;
-    protected $service;
+    private $client;
+    private $service;
 
     public function __construct()
     {
         $this->client = new Client();
-        $this->client->setApplicationName('Product Database');
+        $this->client->setApplicationName('Thread Colors Importer');
         $this->client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-        $this->client->setAccessType('offline');
-        
-        // For now, we'll use API key authentication
-        // In production, you'd want to use OAuth2 or service account
-        $this->client->setDeveloperKey(config('services.google.api_key'));
-        
+        $this->client->setAuthConfig(storage_path('app/google-credentials.json'));
         $this->service = new Sheets($this->client);
     }
 
-    /**
-     * Read data from a Google Sheet
-     */
-    public function readSheet(string $spreadsheetId, string $range = 'A:Z'): array
+    public function getThreadColorsFromSheet($spreadsheetId, $range = 'Madeira Swatches!A:B')
     {
         try {
             $response = $this->service->spreadsheets_values->get($spreadsheetId, $range);
-            return $response->getValues() ?? [];
+            $values = $response->getValues();
+
+            if (empty($values)) {
+                return [];
+            }
+
+            $threadColors = [];
+            $headers = array_shift($values); // Remove header row
+
+            foreach ($values as $row) {
+                if (count($row) >= 2) {
+                    $threadColors[] = [
+                        'color_name' => $row[0],
+                        'color_code' => $row[0],
+                        'image_url' => $row[1] ?? null,
+                    ];
+                }
+            }
+
+            return $threadColors;
         } catch (\Exception $e) {
             Log::error('Google Sheets API Error: ' . $e->getMessage());
-            throw new \Exception('Failed to read Google Sheet: ' . $e->getMessage());
+            throw $e;
         }
     }
 
-    /**
-     * Parse Google Sheets data into products
-     */
-    public function parseProductsFromSheet(array $sheetData): array
+    public function getThreadColorsWithImagesFromSheet($spreadsheetId, $range = 'Madeira Swatches!A:B')
     {
-        if (empty($sheetData)) {
-            return [];
-        }
+        try {
+            // First, get the values
+            $response = $this->service->spreadsheets_values->get($spreadsheetId, $range);
+            $values = $response->getValues();
 
-        $headers = array_shift($sheetData); // First row is headers
-        $products = [];
-
-        foreach ($sheetData as $rowIndex => $row) {
-            // Skip empty rows
-            if (empty(array_filter($row))) {
-                continue;
+            if (empty($values)) {
+                return [];
             }
 
-            $productData = [];
-            
-            // Map each column to product field
-            foreach ($headers as $columnIndex => $header) {
-                $value = $row[$columnIndex] ?? '';
-                
-                // Map common column names to product fields
-                $field = $this->mapColumnToField($header);
-                if ($field) {
-                    $productData[$field] = trim($value);
+            // Get the spreadsheet to access images
+            $spreadsheet = $this->service->spreadsheets->get($spreadsheetId);
+            $sheet = $spreadsheet->getSheets()[0];
+            $sheetId = $sheet->getProperties()->getSheetId();
+
+            $threadColors = [];
+            $headers = array_shift($values); // Remove header row
+
+            foreach ($values as $index => $row) {
+                if (count($row) >= 1) {
+                    $colorCode = $row[0];
+                    
+                    // Try to get image from the sheet
+                    $imageUrl = $this->getImageFromSheet($spreadsheetId, $sheetId, $index + 2); // +2 because we removed header and arrays are 0-indexed
+                    
+                    $threadColors[] = [
+                        'color_name' => $colorCode,
+                        'color_code' => $colorCode,
+                        'image_url' => $imageUrl,
+                    ];
                 }
             }
 
-            // Only create product if we have a name
-            if (!empty($productData['name'])) {
-                // Generate Ethos ID if not provided
-                if (empty($productData['sku'])) {
-                    $productData['sku'] = $this->generateConsistentEthosId($productData['name'], $productData['supplier'] ?? '');
-                }
-                
-                $products[] = $productData;
-            }
+            return $threadColors;
+        } catch (\Exception $e) {
+            Log::error('Google Sheets API Error: ' . $e->getMessage());
+            throw $e;
         }
-
-        return $products;
     }
 
-    /**
-     * Map Google Sheets column headers to product fields
-     */
-    private function mapColumnToField(string $header): ?string
+    private function getImageFromSheet($spreadsheetId, $sheetId, $rowIndex)
     {
-        $header = strtolower(trim($header));
-        
-        $mapping = [
-            // Ethos ID variations (first column)
-            'ethos_id' => 'sku',
-            'ethos id' => 'sku',
-            'ethosid' => 'sku',
-            'eid' => 'sku',
-            'id' => 'sku',
-            'product_id' => 'sku',
-            
-            // Product name variations
-            'name' => 'name',
-            'product name' => 'name',
-            'product_name' => 'name',
-            'title' => 'name',
-            'item name' => 'name',
-            'item_name' => 'name',
-            
-            // Supplier variations
-            'supplier' => 'supplier',
-            'vendor' => 'supplier',
-            'brand' => 'supplier',
-            'manufacturer' => 'supplier',
-            
-            // Product type variations
-            'type' => 'product_type',
-            'product type' => 'product_type',
-            'product_type' => 'product_type',
-            'category' => 'product_type',
-            'style' => 'product_type',
-            
-            // Website URL variations
-            'url' => 'website_url',
-            'website' => 'website_url',
-            'website url' => 'website_url',
-            'website_url' => 'website_url',
-            'link' => 'website_url',
-            
-            // Base color variations
-            'color' => 'base_color',
-            'base color' => 'base_color',
-            'base_color' => 'base_color',
-            'primary color' => 'base_color',
-            'primary_color' => 'base_color',
-            'main color' => 'base_color',
-            'main_color' => 'base_color',
-            
-            // Tone on tone darker variations
-            'tone on tone darker' => 'tone_on_tone_darker',
-            'darker' => 'tone_on_tone_darker',
-            'tone darker' => 'tone_on_tone_darker',
-            'tone_darker' => 'tone_on_tone_darker',
-            'dark color' => 'tone_on_tone_darker',
-            'dark_color' => 'tone_on_tone_darker',
-            'shadow' => 'tone_on_tone_darker',
-            
-            // Tone on tone lighter variations
-            'tone on tone lighter' => 'tone_on_tone_lighter',
-            'lighter' => 'tone_on_tone_lighter',
-            'tone lighter' => 'tone_on_tone_lighter',
-            'tone_lighter' => 'tone_on_tone_lighter',
-            'light color' => 'tone_on_tone_lighter',
-            'light_color' => 'tone_on_tone_lighter',
-            'highlight' => 'tone_on_tone_lighter',
-            
-            // Notes variations
-            'notes' => 'notes',
-            'description' => 'notes',
-            'comments' => 'notes',
-            'remarks' => 'notes',
-        ];
-
-        return $mapping[$header] ?? null;
-    }
-
-    /**
-     * Extract spreadsheet ID from Google Sheets URL
-     */
-    public function extractSpreadsheetId(string $url): ?string
-    {
-        // Handle various Google Sheets URL formats
-        $patterns = [
-            '/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/',
-            '/\/d\/([a-zA-Z0-9-_]+)/',
-            '/spreadsheets\/d\/([a-zA-Z0-9-_]+)/',
-        ];
-
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $url, $matches)) {
-                return $matches[1];
-            }
+        try {
+            // This is a simplified approach - in reality, getting images from Google Sheets
+            // requires more complex handling of embedded objects
+            // For now, we'll return null and handle this differently
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Error getting image from sheet: ' . $e->getMessage());
+            return null;
         }
-
-        return null;
-    }
-
-    /**
-     * Validate Google Sheets URL
-     */
-    public function isValidGoogleSheetsUrl(string $url): bool
-    {
-        return $this->extractSpreadsheetId($url) !== null;
-    }
-
-    /**
-     * Generate a consistent Ethos ID for a product
-     */
-    private function generateConsistentEthosId(string $productName, string $supplier = ''): string
-    {
-        // Create a consistent Ethos ID based on product name and supplier
-        // This ensures the same product always gets the same Ethos ID
-        $hash = md5($productName . $supplier);
-        $numericHash = hexdec(substr($hash, 0, 8));
-        
-        // Convert to 10-digit format starting from 1
-        $ethosNumber = ($numericHash % 9999999999) + 1;
-        
-        return 'EiD' . str_pad($ethosNumber, 10, '0', STR_PAD_LEFT);
     }
 }

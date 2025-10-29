@@ -35,8 +35,9 @@ return [
         ],
     ],
 
-    'google' => [
-        'api_key' => env('GOOGLE_API_KEY'),
+    'google_sheets' => [
+        'credentials_path' => storage_path('app/google-credentials.json'),
+        'spreadsheet_id' => env('GOOGLE_SHEETS_SPREADSHEET_ID', '1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8'),
     ],
 
 ];
