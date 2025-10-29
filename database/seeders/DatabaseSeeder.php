@@ -25,6 +25,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProductSeeder::class,
             ThreadColorSeeder::class,
+            PuffPrintColorSeeder::class,
+            RolePermissionSeeder::class,
+            SockSeeder::class,
+            ThreadBookColorSeeder::class,
+            ThreadColorSeeder::class,
+            EnhancedProductSeeder::class,
         ]);
     }
 }
