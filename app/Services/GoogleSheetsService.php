@@ -17,7 +17,22 @@ class GoogleSheetsService
         $this->client = new Client();
         $this->client->setApplicationName('Thread Colors Importer');
         $this->client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-        $this->client->setAuthConfig(storage_path('app/google-credentials.json'));
+        
+        // Try to load credentials from environment variable first
+        $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS', storage_path('app/google-credentials.json'));
+        
+        if (file_exists($credentialsPath)) {
+            $this->client->setAuthConfig($credentialsPath);
+        } else {
+            // Fallback to API key if available
+            $apiKey = env('GOOGLE_API_KEY');
+            if ($apiKey) {
+                $this->client->setDeveloperKey($apiKey);
+            } else {
+                throw new \Exception('No Google credentials found. Please set up GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_API_KEY');
+            }
+        }
+        
         $this->service = new Sheets($this->client);
     }
 
@@ -35,52 +50,14 @@ class GoogleSheetsService
             $headers = array_shift($values); // Remove header row
 
             foreach ($values as $row) {
-                if (count($row) >= 2) {
-                    $threadColors[] = [
-                        'color_name' => $row[0],
-                        'color_code' => $row[0],
-                        'image_url' => $row[1] ?? null,
-                    ];
-                }
-            }
-
-            return $threadColors;
-        } catch (\Exception $e) {
-            Log::error('Google Sheets API Error: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    public function getThreadColorsWithImagesFromSheet($spreadsheetId, $range = 'Madeira Swatches!A:B')
-    {
-        try {
-            // First, get the values
-            $response = $this->service->spreadsheets_values->get($spreadsheetId, $range);
-            $values = $response->getValues();
-
-            if (empty($values)) {
-                return [];
-            }
-
-            // Get the spreadsheet to access images
-            $spreadsheet = $this->service->spreadsheets->get($spreadsheetId);
-            $sheet = $spreadsheet->getSheets()[0];
-            $sheetId = $sheet->getProperties()->getSheetId();
-
-            $threadColors = [];
-            $headers = array_shift($values); // Remove header row
-
-            foreach ($values as $index => $row) {
                 if (count($row) >= 1) {
                     $colorCode = $row[0];
-                    
-                    // Try to get image from the sheet
-                    $imageUrl = $this->getImageFromSheet($spreadsheetId, $sheetId, $index + 2); // +2 because we removed header and arrays are 0-indexed
+                    $imageUrl = isset($row[1]) ? $row[1] : null;
                     
                     $threadColors[] = [
                         'color_name' => $colorCode,
                         'color_code' => $colorCode,
-                        'image_url' => $imageUrl,
+                        'image_url' => $imageUrl ?: 'https://via.placeholder.com/120x59?text=' . $colorCode,
                     ];
                 }
             }
@@ -92,16 +69,22 @@ class GoogleSheetsService
         }
     }
 
-    private function getImageFromSheet($spreadsheetId, $sheetId, $rowIndex)
+    public function testConnection($spreadsheetId)
     {
         try {
-            // This is a simplified approach - in reality, getting images from Google Sheets
-            // requires more complex handling of embedded objects
-            // For now, we'll return null and handle this differently
-            return null;
+            $response = $this->service->spreadsheets->get($spreadsheetId);
+            return [
+                'success' => true,
+                'title' => $response->getProperties()->getTitle(),
+                'sheets' => array_map(function($sheet) {
+                    return $sheet->getProperties()->getTitle();
+                }, $response->getSheets())
+            ];
         } catch (\Exception $e) {
-            Log::error('Error getting image from sheet: ' . $e->getMessage());
-            return null;
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
         }
     }
 }

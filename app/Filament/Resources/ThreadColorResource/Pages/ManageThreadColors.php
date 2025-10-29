@@ -7,7 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Filament\Forms;
+use App\Services\GoogleSheetsService;
 use App\Models\ThreadColor;
 
 class ManageThreadColors extends ManageRecords
@@ -17,78 +17,84 @@ class ManageThreadColors extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('importFromCSV')
-                ->label('Import Thread Colors')
-                ->icon('heroicon-o-arrow-up-tray')
-                ->color('success')
-                ->form([
-                    Forms\Components\FileUpload::make('csv_file')
-                        ->label('CSV File')
-                        ->acceptedFileTypes(['text/csv', 'application/csv'])
-                        ->required()
-                        ->helperText('Upload a CSV file with columns: Thread Number, Image URL')
-                ])
-                ->action(function (array $data) {
+            Action::make('testGoogleSheetsConnection')
+                ->label('Test Google Sheets Connection')
+                ->icon('heroicon-o-link')
+                ->color('info')
+                ->action(function () {
                     try {
-                        $filePath = storage_path('app/public/' . $data['csv_file']);
+                        $googleSheetsService = new GoogleSheetsService();
+                        $spreadsheetId = '1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8';
                         
-                        if (!file_exists($filePath)) {
+                        $result = $googleSheetsService->testConnection($spreadsheetId);
+                        
+                        if ($result['success']) {
                             Notification::make()
-                                ->title('Error')
-                                ->body('File not found')
+                                ->title('Connection Successful!')
+                                ->body("Connected to: {$result['title']}. Available sheets: " . implode(', ', $result['sheets']))
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('Connection Failed')
+                                ->body('Error: ' . $result['error'])
                                 ->danger()
+                                ->send();
+                        }
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Connection Error')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->tooltip('Test connection to Google Sheets'),
+            Action::make('importFromGoogleSheets')
+                ->label('Import from Google Sheets')
+                ->icon('heroicon-o-cloud-arrow-down')
+                ->color('success')
+                ->action(function () {
+                    try {
+                        $googleSheetsService = new GoogleSheetsService();
+                        $spreadsheetId = '1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8';
+                        
+                        $threadColors = $googleSheetsService->getThreadColorsFromSheet($spreadsheetId, 'Madeira Swatches!A:B');
+                        
+                        if (empty($threadColors)) {
+                            Notification::make()
+                                ->title('No Data Found')
+                                ->body('No thread colors found in the specified range')
+                                ->warning()
                                 ->send();
                             return;
                         }
-
-                        $handle = fopen($filePath, 'r');
-                        if (!$handle) {
-                            Notification::make()
-                                ->title('Error')
-                                ->body('Could not open CSV file')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
-
-                        // Skip header row
-                        fgetcsv($handle);
 
                         // Clear existing data
                         ThreadColor::truncate();
 
+                        // Import new data
                         $imported = 0;
-                        while (($row = fgetcsv($handle)) !== false) {
-                            if (count($row) >= 2) {
-                                $colorCode = trim($row[0]);
-                                $imageUrl = trim($row[1]);
-
-                                ThreadColor::create([
-                                    'color_name' => $colorCode,
-                                    'color_code' => $colorCode,
-                                    'image_url' => $imageUrl ?: 'https://via.placeholder.com/120x59?text=' . $colorCode,
-                                ]);
-                                $imported++;
-                            }
+                        foreach ($threadColors as $threadColor) {
+                            ThreadColor::create($threadColor);
+                            $imported++;
                         }
 
-                        fclose($handle);
-
                         Notification::make()
-                            ->title('Success!')
-                            ->body("Imported {$imported} thread colors successfully")
+                            ->title('Import Successful!')
+                            ->body("Imported {$imported} thread colors from Google Sheets")
                             ->success()
                             ->send();
 
                     } catch (\Exception $e) {
                         Notification::make()
-                            ->title('Error')
-                            ->body('Error importing thread colors: ' . $e->getMessage())
+                            ->title('Import Failed')
+                            ->body('Error: ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
                 })
-                ->tooltip('Upload a CSV file to import thread colors with image URLs'),
+                ->tooltip('Import all thread colors with image URLs from Google Sheets'),
             Action::make('downloadThreadColors')
                 ->label('Download Thread Colors')
                 ->icon('heroicon-o-arrow-down-tray')
@@ -104,4 +110,3 @@ class ManageThreadColors extends ManageRecords
         ];
     }
 }
-
