@@ -8,7 +8,7 @@ use Filament\Resources\Pages\ManageRecords;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use App\Services\GoogleSheetsService;
-use App\Services\DropboxService;
+use App\Services\GoogleDriveService;
 use App\Models\ThreadColor;
 use Filament\Forms;
 
@@ -79,32 +79,44 @@ class ManageThreadColors extends ManageRecords
                     }
                 })
                 ->tooltip('Upload multiple thread color images at once. Name files with thread numbers.'),
-            Action::make('testDropboxConnection')
-                ->label('Test Dropbox Connection')
+            Action::make('testGoogleDriveConnection')
+                ->label('Test Google Drive Connection')
                 ->icon('heroicon-o-cloud')
                 ->color('info')
                 ->form([
-                    Forms\Components\TextInput::make('dropbox_folder_url')
-                        ->label('Dropbox Shared Folder URL')
+                    Forms\Components\TextInput::make('google_drive_folder_url')
+                        ->label('Google Drive Folder URL')
                         ->url()
                         ->required()
-                        ->helperText('Paste the shared Dropbox folder URL here')
-                        ->placeholder('https://www.dropbox.com/sh/...')
+                        ->helperText('Paste the Google Drive folder URL here')
+                        ->placeholder('https://drive.google.com/drive/folders/...')
+                        ->default('https://drive.google.com/drive/folders/1RDevqNIwqVJixqs4VwJGb3GsakeP5kgl?usp=drive_link')
                 ])
                 ->action(function (array $data) {
                     try {
-                        $dropboxService = new DropboxService();
-                        $result = $dropboxService->testConnection($data['dropbox_folder_url']);
+                        $googleDriveService = new GoogleDriveService();
+                        $folderId = $googleDriveService->extractFolderIdFromUrl($data['google_drive_folder_url']);
+                        
+                        if (!$folderId) {
+                            Notification::make()
+                                ->title('Invalid URL')
+                                ->body('Could not extract folder ID from the provided URL')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+                        
+                        $result = $googleDriveService->testConnection($folderId);
                         
                         if ($result['success']) {
                             Notification::make()
-                                ->title('Dropbox Connection Successful!')
-                                ->body("Found {$result['fileCount']} files in the folder. First few files: " . implode(', ', array_column($result['files'], 'name')))
+                                ->title('Google Drive Connection Successful!')
+                                ->body("Found {$result['totalFiles']} total files, {$result['imageFiles']} image files. Sample files: " . implode(', ', array_column($result['sampleFiles'], 'name')))
                                 ->success()
                                 ->send();
                         } else {
                             Notification::make()
-                                ->title('Dropbox Connection Failed')
+                                ->title('Google Drive Connection Failed')
                                 ->body('Error: ' . $result['error'])
                                 ->danger()
                                 ->send();
@@ -117,18 +129,19 @@ class ManageThreadColors extends ManageRecords
                             ->send();
                     }
                 })
-                ->tooltip('Test connection to Dropbox shared folder'),
-            Action::make('importFromDropbox')
-                ->label('Import from Dropbox Folder')
+                ->tooltip('Test connection to Google Drive folder'),
+            Action::make('importFromGoogleDrive')
+                ->label('Import from Google Drive Folder')
                 ->icon('heroicon-o-cloud-arrow-down')
                 ->color('success')
                 ->form([
-                    Forms\Components\TextInput::make('dropbox_folder_url')
-                        ->label('Dropbox Shared Folder URL')
+                    Forms\Components\TextInput::make('google_drive_folder_url')
+                        ->label('Google Drive Folder URL')
                         ->url()
                         ->required()
-                        ->helperText('Paste the shared Dropbox folder URL here')
-                        ->placeholder('https://www.dropbox.com/sh/...'),
+                        ->helperText('Paste the Google Drive folder URL here')
+                        ->placeholder('https://drive.google.com/drive/folders/...')
+                        ->default('https://drive.google.com/drive/folders/1RDevqNIwqVJixqs4VwJGb3GsakeP5kgl?usp=drive_link'),
                     Forms\Components\TextInput::make('limit')
                         ->label('Limit (optional)')
                         ->numeric()
@@ -139,8 +152,19 @@ class ManageThreadColors extends ManageRecords
                     try {
                         set_time_limit(300); // 5 minutes
                         
-                        $dropboxService = new DropboxService();
+                        $googleDriveService = new GoogleDriveService();
                         $googleSheetsService = new GoogleSheetsService();
+                        
+                        // Extract folder ID
+                        $folderId = $googleDriveService->extractFolderIdFromUrl($data['google_drive_folder_url']);
+                        if (!$folderId) {
+                            Notification::make()
+                                ->title('Invalid URL')
+                                ->body('Could not extract folder ID from the provided URL')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
                         
                         // Get thread colors from Google Sheets
                         $spreadsheetId = '1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8';
@@ -166,8 +190,8 @@ class ManageThreadColors extends ManageRecords
                         $downloadedCount = 0;
                         
                         foreach ($threadColors as $threadColor) {
-                            // Try to get image from Dropbox
-                            $imagePath = $dropboxService->downloadAndStoreImage($data['dropbox_folder_url'], $threadColor['color_code']);
+                            // Try to get image from Google Drive
+                            $imagePath = $googleDriveService->downloadAndStoreImage($folderId, $threadColor['color_code']);
                             
                             if ($imagePath) {
                                 $threadColor['image_url'] = $imagePath;
@@ -183,7 +207,7 @@ class ManageThreadColors extends ManageRecords
 
                         Notification::make()
                             ->title('Import Successful!')
-                            ->body("Imported {$imported} thread colors. Downloaded {$downloadedCount} images from Dropbox!")
+                            ->body("Imported {$imported} thread colors. Downloaded {$downloadedCount} images from Google Drive!")
                             ->success()
                             ->send();
 
@@ -195,7 +219,7 @@ class ManageThreadColors extends ManageRecords
                             ->send();
                     }
                 })
-                ->tooltip('Import thread colors and download images from Dropbox folder'),
+                ->tooltip('Import thread colors and download images from Google Drive folder'),
             Action::make('testGoogleSheetsConnection')
                 ->label('Test Google Sheets Connection')
                 ->icon('heroicon-o-link')
