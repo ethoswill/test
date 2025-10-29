@@ -288,6 +288,68 @@ class ProductResource extends Resource
                     ->toggle(),
             ])
                 ->actions([])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\Action::make('bulk_update_colors')
+                        ->label('Bulk Update Colors & CAD')
+                        ->icon('heroicon-o-paint-brush')
+                        ->form([
+                            Forms\Components\FileUpload::make('cad_download')
+                                ->label('CAD Download File')
+                                ->directory('cad-files')
+                                ->visibility('public')
+                                ->acceptedFileTypes(['application/pdf', 'application/zip', 'application/x-zip-compressed'])
+                                ->helperText('Upload a CAD file to apply to all selected products'),
+                            Forms\Components\TextInput::make('base_color')
+                                ->label('Base Color (Hex)')
+                                ->placeholder('#ffffff')
+                                ->helperText('Enter hex color code (e.g., #ffffff)'),
+                            Forms\Components\TextInput::make('tone_on_tone_lighter')
+                                ->label('Tone on Tone Lighter (Hex)')
+                                ->placeholder('#f0f0f0')
+                                ->helperText('Enter hex color code for lighter tone'),
+                            Forms\Components\TextInput::make('tone_on_tone_darker')
+                                ->label('Tone on Tone Darker (Hex)')
+                                ->placeholder('#cccccc')
+                                ->helperText('Enter hex color code for darker tone'),
+                        ])
+                        ->action(function (array $data, $records) {
+                            $updatedCount = 0;
+                            
+                            foreach ($records as $record) {
+                                $updateData = [];
+                                
+                                // Only update fields that have values
+                                if (!empty($data['cad_download'])) {
+                                    $updateData['cad_download'] = $data['cad_download'];
+                                }
+                                if (!empty($data['base_color'])) {
+                                    $updateData['base_color'] = $data['base_color'];
+                                }
+                                if (!empty($data['tone_on_tone_lighter'])) {
+                                    $updateData['tone_on_tone_lighter'] = $data['tone_on_tone_lighter'];
+                                }
+                                if (!empty($data['tone_on_tone_darker'])) {
+                                    $updateData['tone_on_tone_darker'] = $data['tone_on_tone_darker'];
+                                }
+                                
+                                if (!empty($updateData)) {
+                                    $record->update($updateData);
+                                    $updatedCount++;
+                                }
+                            }
+                            
+                            Notification::make()
+                                ->title("Successfully updated {$updatedCount} products")
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading('Bulk Update Colors & CAD')
+                        ->modalDescription('This will update the selected fields for all selected products. Leave fields empty to keep existing values.')
+                        ->modalSubmitActionLabel('Update Products'),
+                ]),
+            ])
             ->headerActions([
                 Tables\Actions\Action::make('google_sheets_template')
                     ->label('Google Sheets Template')
