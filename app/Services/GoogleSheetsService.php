@@ -305,4 +305,42 @@ class GoogleSheetsService
             throw $e;
         }
     }
+
+    public function parseProductsFromSheet($sheetData)
+    {
+        if (empty($sheetData)) {
+            return [];
+        }
+
+        $products = [];
+        $headers = array_shift($sheetData); // Remove header row
+
+        foreach ($sheetData as $row) {
+            // Skip empty rows
+            if (empty($row) || !isset($row[0]) || empty($row[0])) {
+                continue;
+            }
+
+            // Map columns based on CAD Product Database format:
+            // A: Ethos ID, B: Product Name, C: Supplier, D: Product Type, E: Website URL, F: Base Color, G: Tone on Tone Darker, H: Tone on Tone Lighter, I: Notes
+            $productData = [
+                'sku' => $row[0] ?? null,                    // Ethos ID
+                'name' => $row[1] ?? null,                   // Product Name
+                'supplier' => $row[2] ?? null,              // Supplier
+                'product_type' => $row[3] ?? null,           // Product Type
+                'website_url' => $row[4] ?? null,            // Website URL
+                'base_color' => $row[5] ?? null,             // Base Color
+                'tone_on_tone_darker' => $row[6] ?? null,    // Tone on Tone Darker
+                'tone_on_tone_lighter' => $row[7] ?? null,   // Tone on Tone Lighter
+                'notes' => $row[8] ?? null,                 // Notes
+            ];
+
+            // Only add if we have at least a name
+            if (!empty($productData['name'])) {
+                $products[] = $productData;
+            }
+        }
+
+        return $products;
+    }
 }
