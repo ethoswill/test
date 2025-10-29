@@ -34,22 +34,12 @@ class ThreadColorResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Color Code'),
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('Thread Color Image')
-                    ->image()
-                    ->directory('thread-colors')
-                    ->visibility('public')
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                    ->maxSize(2048) // 2MB max
-                    ->helperText('Upload a clear image of the thread color swatch')
-                    ->imageEditor()
-                    ->imageEditorAspectRatios([
-                        '16:9',
-                        '4:3',
-                        '1:1',
-                    ])
-                    ->imageResizeTargetWidth(300)
-                    ->imageResizeTargetHeight(200),
+                Forms\Components\TextInput::make('image_url')
+                    ->label('Thread Color Image URL')
+                    ->url()
+                    ->maxLength(500)
+                    ->helperText('Paste the Shopify-hosted image URL here (e.g., https://cdn.shopify.com/s/files/1/.../1500.png)')
+                    ->placeholder('https://cdn.shopify.com/s/files/1/.../thread-color.png'),
                 Forms\Components\Textarea::make('used_in')
                     ->label('Used In')
                     ->rows(3)
