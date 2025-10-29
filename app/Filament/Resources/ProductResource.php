@@ -314,10 +314,11 @@ class ProductResource extends Resource
                                 ->success()
                                 ->send();
                         })
-                        ->requiresConfirmation()
+                        ->modal()
                         ->modalHeading('Update Base Color')
                         ->modalDescription('This will update the base color for all selected products.')
-                        ->modalSubmitActionLabel('Update Base Color'),
+                        ->modalSubmitActionLabel('Update Base Color')
+                        ->modalWidth('md'),
                     
                     Tables\Actions\Action::make('bulk_update_tone_lighter')
                         ->label('Update Tone on Tone (Lighter)')
@@ -343,10 +344,11 @@ class ProductResource extends Resource
                                 ->success()
                                 ->send();
                         })
-                        ->requiresConfirmation()
+                        ->modal()
                         ->modalHeading('Update Tone on Tone (Lighter)')
                         ->modalDescription('This will update the tone on tone lighter color for all selected products.')
-                        ->modalSubmitActionLabel('Update Lighter Tone'),
+                        ->modalSubmitActionLabel('Update Lighter Tone')
+                        ->modalWidth('md'),
                     
                     Tables\Actions\Action::make('bulk_update_tone_darker')
                         ->label('Update Tone on Tone (Darker)')
@@ -372,10 +374,11 @@ class ProductResource extends Resource
                                 ->success()
                                 ->send();
                         })
-                        ->requiresConfirmation()
+                        ->modal()
                         ->modalHeading('Update Tone on Tone (Darker)')
                         ->modalDescription('This will update the tone on tone darker color for all selected products.')
-                        ->modalSubmitActionLabel('Update Darker Tone'),
+                        ->modalSubmitActionLabel('Update Darker Tone')
+                        ->modalWidth('md'),
                     
                     Tables\Actions\Action::make('bulk_update_cad_download')
                         ->label('Update CAD Download URL')
@@ -402,10 +405,11 @@ class ProductResource extends Resource
                                 ->success()
                                 ->send();
                         })
-                        ->requiresConfirmation()
+                        ->modal()
                         ->modalHeading('Update CAD Download URL')
                         ->modalDescription('This will update the CAD download URL for all selected products.')
-                        ->modalSubmitActionLabel('Update CAD URL'),
+                        ->modalSubmitActionLabel('Update CAD URL')
+                        ->modalWidth('md'),
                 ]),
             ])
             ->headerActions([
