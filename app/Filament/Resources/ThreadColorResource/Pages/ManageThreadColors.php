@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ManageRecords;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use App\Services\GoogleSheetsService;
+use App\Services\DropboxService;
 use App\Models\ThreadColor;
 use Filament\Forms;
 
@@ -78,6 +79,123 @@ class ManageThreadColors extends ManageRecords
                     }
                 })
                 ->tooltip('Upload multiple thread color images at once. Name files with thread numbers.'),
+            Action::make('testDropboxConnection')
+                ->label('Test Dropbox Connection')
+                ->icon('heroicon-o-cloud')
+                ->color('info')
+                ->form([
+                    Forms\Components\TextInput::make('dropbox_folder_url')
+                        ->label('Dropbox Shared Folder URL')
+                        ->url()
+                        ->required()
+                        ->helperText('Paste the shared Dropbox folder URL here')
+                        ->placeholder('https://www.dropbox.com/sh/...')
+                ])
+                ->action(function (array $data) {
+                    try {
+                        $dropboxService = new DropboxService();
+                        $result = $dropboxService->testConnection($data['dropbox_folder_url']);
+                        
+                        if ($result['success']) {
+                            Notification::make()
+                                ->title('Dropbox Connection Successful!')
+                                ->body("Found {$result['fileCount']} files in the folder. First few files: " . implode(', ', array_column($result['files'], 'name')))
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('Dropbox Connection Failed')
+                                ->body('Error: ' . $result['error'])
+                                ->danger()
+                                ->send();
+                        }
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Connection Error')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->tooltip('Test connection to Dropbox shared folder'),
+            Action::make('importFromDropbox')
+                ->label('Import from Dropbox Folder')
+                ->icon('heroicon-o-cloud-arrow-down')
+                ->color('success')
+                ->form([
+                    Forms\Components\TextInput::make('dropbox_folder_url')
+                        ->label('Dropbox Shared Folder URL')
+                        ->url()
+                        ->required()
+                        ->helperText('Paste the shared Dropbox folder URL here')
+                        ->placeholder('https://www.dropbox.com/sh/...'),
+                    Forms\Components\TextInput::make('limit')
+                        ->label('Limit (optional)')
+                        ->numeric()
+                        ->default(50)
+                        ->helperText('Number of thread colors to process (default: 50)')
+                ])
+                ->action(function (array $data) {
+                    try {
+                        set_time_limit(300); // 5 minutes
+                        
+                        $dropboxService = new DropboxService();
+                        $googleSheetsService = new GoogleSheetsService();
+                        
+                        // Get thread colors from Google Sheets
+                        $spreadsheetId = '1gTHgdksxGx7CThTbAENPJ44ndhCJBJPoEn0l1_68QK8';
+                        $threadColors = $googleSheetsService->getThreadColorsFromSheet($spreadsheetId, 'Madeira Swatches!A:B');
+                        
+                        if (empty($threadColors)) {
+                            Notification::make()
+                                ->title('No Data Found')
+                                ->body('No thread colors found in Google Sheets')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
+                        // Limit processing
+                        $limit = $data['limit'] ?? 50;
+                        $threadColors = array_slice($threadColors, 0, $limit);
+
+                        // Clear existing data
+                        ThreadColor::truncate();
+
+                        $imported = 0;
+                        $downloadedCount = 0;
+                        
+                        foreach ($threadColors as $threadColor) {
+                            // Try to get image from Dropbox
+                            $imagePath = $dropboxService->downloadAndStoreImage($data['dropbox_folder_url'], $threadColor['color_code']);
+                            
+                            if ($imagePath) {
+                                $threadColor['image_url'] = $imagePath;
+                                $downloadedCount++;
+                            }
+
+                            ThreadColor::create($threadColor);
+                            $imported++;
+                            
+                            // Small delay to prevent rate limiting
+                            usleep(100000); // 0.1 second
+                        }
+
+                        Notification::make()
+                            ->title('Import Successful!')
+                            ->body("Imported {$imported} thread colors. Downloaded {$downloadedCount} images from Dropbox!")
+                            ->success()
+                            ->send();
+
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Import Failed')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->tooltip('Import thread colors and download images from Dropbox folder'),
             Action::make('testGoogleSheetsConnection')
                 ->label('Test Google Sheets Connection')
                 ->icon('heroicon-o-link')
