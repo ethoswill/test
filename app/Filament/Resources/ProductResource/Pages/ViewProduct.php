@@ -14,6 +14,42 @@ class ViewProduct extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('previous')
+                ->label('Previous Product')
+                ->icon('heroicon-o-chevron-left')
+                ->color('gray')
+                ->url(function () {
+                    $previousProduct = \App\Models\Product::where('id', '<', $this->record->id)
+                        ->orderBy('id', 'desc')
+                        ->first();
+                    
+                    if ($previousProduct) {
+                        return route('filament.admin.resources.products.view', $previousProduct);
+                    }
+                    
+                    return null;
+                })
+                ->disabled(function () {
+                    return !\App\Models\Product::where('id', '<', $this->record->id)->exists();
+                }),
+            Actions\Action::make('next')
+                ->label('Next Product')
+                ->icon('heroicon-o-chevron-right')
+                ->color('gray')
+                ->url(function () {
+                    $nextProduct = \App\Models\Product::where('id', '>', $this->record->id)
+                        ->orderBy('id', 'asc')
+                        ->first();
+                    
+                    if ($nextProduct) {
+                        return route('filament.admin.resources.products.view', $nextProduct);
+                    }
+                    
+                    return null;
+                })
+                ->disabled(function () {
+                    return !\App\Models\Product::where('id', '>', $this->record->id)->exists();
+                }),
             Actions\EditAction::make(),
         ];
     }
