@@ -290,63 +290,122 @@ class ProductResource extends Resource
                 ->actions([])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\Action::make('bulk_update_colors')
-                        ->label('Bulk Update Colors & CAD')
-                        ->icon('heroicon-o-paint-brush')
+                    Tables\Actions\Action::make('bulk_update_base_color')
+                        ->label('Update Base Color')
+                        ->icon('heroicon-o-swatch')
+                        ->color('blue')
                         ->form([
-                            Forms\Components\TextInput::make('cad_download')
-                                ->label('CAD Download URL')
-                                ->url()
-                                ->placeholder('https://example.com/cad-file.pdf')
-                                ->helperText('Enter a hosted URL to a CAD file (PDF, ZIP, etc.)'),
                             Forms\Components\TextInput::make('base_color')
                                 ->label('Base Color (Hex)')
                                 ->placeholder('#ffffff')
-                                ->helperText('Enter hex color code (e.g., #ffffff)'),
-                            Forms\Components\TextInput::make('tone_on_tone_lighter')
-                                ->label('Tone on Tone Lighter (Hex)')
-                                ->placeholder('#f0f0f0')
-                                ->helperText('Enter hex color code for lighter tone'),
-                            Forms\Components\TextInput::make('tone_on_tone_darker')
-                                ->label('Tone on Tone Darker (Hex)')
-                                ->placeholder('#cccccc')
-                                ->helperText('Enter hex color code for darker tone'),
+                                ->helperText('Enter hex color code (e.g., #ffffff)')
+                                ->required(),
                         ])
                         ->action(function (array $data, $records) {
                             $updatedCount = 0;
                             
                             foreach ($records as $record) {
-                                $updateData = [];
-                                
-                                // Only update fields that have values
-                                if (!empty($data['cad_download'])) {
-                                    $updateData['cad_download'] = $data['cad_download'];
-                                }
-                                if (!empty($data['base_color'])) {
-                                    $updateData['base_color'] = $data['base_color'];
-                                }
-                                if (!empty($data['tone_on_tone_lighter'])) {
-                                    $updateData['tone_on_tone_lighter'] = $data['tone_on_tone_lighter'];
-                                }
-                                if (!empty($data['tone_on_tone_darker'])) {
-                                    $updateData['tone_on_tone_darker'] = $data['tone_on_tone_darker'];
-                                }
-                                
-                                if (!empty($updateData)) {
-                                    $record->update($updateData);
-                                    $updatedCount++;
-                                }
+                                $record->update(['base_color' => $data['base_color']]);
+                                $updatedCount++;
                             }
                             
                             Notification::make()
-                                ->title("Successfully updated {$updatedCount} products")
+                                ->title("Successfully updated base color for {$updatedCount} products")
                                 ->success()
                                 ->send();
                         })
                         ->requiresConfirmation()
-                        ->modalHeading('Bulk Update Colors & CAD')
-                        ->modalDescription('This will update the selected fields for all selected products. Enter a hosted URL for CAD files or hex colors. Leave fields empty to keep existing values.')
-                        ->modalSubmitActionLabel('Update Products'),
+                        ->modalHeading('Update Base Color')
+                        ->modalDescription('This will update the base color for all selected products.')
+                        ->modalSubmitActionLabel('Update Base Color'),
+                    
+                    Tables\Actions\Action::make('bulk_update_tone_lighter')
+                        ->label('Update Tone on Tone (Lighter)')
+                        ->icon('heroicon-o-swatch')
+                        ->color('green')
+                        ->form([
+                            Forms\Components\TextInput::make('tone_on_tone_lighter')
+                                ->label('Tone on Tone Lighter (Hex)')
+                                ->placeholder('#f0f0f0')
+                                ->helperText('Enter hex color code for lighter tone')
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $records) {
+                            $updatedCount = 0;
+                            
+                            foreach ($records as $record) {
+                                $record->update(['tone_on_tone_lighter' => $data['tone_on_tone_lighter']]);
+                                $updatedCount++;
+                            }
+                            
+                            Notification::make()
+                                ->title("Successfully updated tone on tone lighter for {$updatedCount} products")
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading('Update Tone on Tone (Lighter)')
+                        ->modalDescription('This will update the tone on tone lighter color for all selected products.')
+                        ->modalSubmitActionLabel('Update Lighter Tone'),
+                    
+                    Tables\Actions\Action::make('bulk_update_tone_darker')
+                        ->label('Update Tone on Tone (Darker)')
+                        ->icon('heroicon-o-swatch')
+                        ->color('gray')
+                        ->form([
+                            Forms\Components\TextInput::make('tone_on_tone_darker')
+                                ->label('Tone on Tone Darker (Hex)')
+                                ->placeholder('#cccccc')
+                                ->helperText('Enter hex color code for darker tone')
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $records) {
+                            $updatedCount = 0;
+                            
+                            foreach ($records as $record) {
+                                $record->update(['tone_on_tone_darker' => $data['tone_on_tone_darker']]);
+                                $updatedCount++;
+                            }
+                            
+                            Notification::make()
+                                ->title("Successfully updated tone on tone darker for {$updatedCount} products")
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading('Update Tone on Tone (Darker)')
+                        ->modalDescription('This will update the tone on tone darker color for all selected products.')
+                        ->modalSubmitActionLabel('Update Darker Tone'),
+                    
+                    Tables\Actions\Action::make('bulk_update_cad_download')
+                        ->label('Update CAD Download URL')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('purple')
+                        ->form([
+                            Forms\Components\TextInput::make('cad_download')
+                                ->label('CAD Download URL')
+                                ->url()
+                                ->placeholder('https://example.com/cad-file.pdf')
+                                ->helperText('Enter a hosted URL to a CAD file (PDF, ZIP, etc.)')
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $records) {
+                            $updatedCount = 0;
+                            
+                            foreach ($records as $record) {
+                                $record->update(['cad_download' => $data['cad_download']]);
+                                $updatedCount++;
+                            }
+                            
+                            Notification::make()
+                                ->title("Successfully updated CAD download URL for {$updatedCount} products")
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading('Update CAD Download URL')
+                        ->modalDescription('This will update the CAD download URL for all selected products.')
+                        ->modalSubmitActionLabel('Update CAD URL'),
                 ]),
             ])
             ->headerActions([
