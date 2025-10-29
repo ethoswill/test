@@ -16,23 +16,14 @@ class GoogleSheetsService
     {
         $this->client = new Client();
         $this->client->setApplicationName('Thread Colors Importer');
-        $this->client->setScopes([Sheets::SPREADSHEETS_READONLY]);
         
-        // Try to load credentials from environment variable first
-        $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS', storage_path('app/google-credentials.json'));
-        
-        if (file_exists($credentialsPath)) {
-            $this->client->setAuthConfig($credentialsPath);
-        } else {
-            // Fallback to API key if available
-            $apiKey = env('GOOGLE_API_KEY');
-            if ($apiKey) {
-                $this->client->setDeveloperKey($apiKey);
-            } else {
-                throw new \Exception('No Google credentials found. Please set up GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_API_KEY');
-            }
+        // Use API key authentication (simpler than service account)
+        $apiKey = env('GOOGLE_API_KEY');
+        if (!$apiKey) {
+            throw new \Exception('GOOGLE_API_KEY not found in environment variables. Please add it to your .env file');
         }
         
+        $this->client->setDeveloperKey($apiKey);
         $this->service = new Sheets($this->client);
     }
 
