@@ -585,7 +585,9 @@ class ProductResource extends Resource
                     ->modalDescription('This will sync the latest data from your Google Sheet. Existing products will be updated, new products will be added.')
                     ->modalSubmitActionLabel('Refresh Now'),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')
+            ->paginated([10, 25, 50, 100])
+            ->defaultPaginationPageOption(25);
     }
 
     public static function getRelations(): array
@@ -659,12 +661,14 @@ class ProductResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
+        // Use a more efficient count query instead of loading all models
         return static::getModel()::count();
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
-        $lowStockCount = static::getModel()::lowStock()->count();
+        // Use a more efficient count query
+        $lowStockCount = static::getModel()::whereRaw('stock_quantity <= min_stock_level')->count();
         return $lowStockCount > 0 ? 'gray' : null;
     }
 }
