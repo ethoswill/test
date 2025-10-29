@@ -294,12 +294,11 @@ class ProductResource extends Resource
                         ->label('Bulk Update Colors & CAD')
                         ->icon('heroicon-o-paint-brush')
                         ->form([
-                            Forms\Components\FileUpload::make('cad_download')
-                                ->label('CAD Download File')
-                                ->directory('cad-files')
-                                ->visibility('public')
-                                ->acceptedFileTypes(['application/pdf', 'application/zip', 'application/x-zip-compressed'])
-                                ->helperText('Upload a CAD file to apply to all selected products'),
+                            Forms\Components\TextInput::make('cad_download')
+                                ->label('CAD Download URL')
+                                ->url()
+                                ->placeholder('https://example.com/cad-file.pdf')
+                                ->helperText('Enter a hosted URL to a CAD file (PDF, ZIP, etc.)'),
                             Forms\Components\TextInput::make('base_color')
                                 ->label('Base Color (Hex)')
                                 ->placeholder('#ffffff')
@@ -346,7 +345,7 @@ class ProductResource extends Resource
                         })
                         ->requiresConfirmation()
                         ->modalHeading('Bulk Update Colors & CAD')
-                        ->modalDescription('This will update the selected fields for all selected products. Leave fields empty to keep existing values.')
+                        ->modalDescription('This will update the selected fields for all selected products. Enter a hosted URL for CAD files or hex colors. Leave fields empty to keep existing values.')
                         ->modalSubmitActionLabel('Update Products'),
                 ]),
             ])
