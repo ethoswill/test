@@ -17,12 +17,14 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Placeholder;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Actions\Action;
@@ -88,13 +90,24 @@ class ProductResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\Hidden::make('base_color_hex')
                             ->default('#FFFFFF'),
+                        SpatieMediaLibraryFileUpload::make('cad_download')
+                            ->collection('cad_download')
+                            ->label('CAD Download')
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->helperText('Upload a PDF or image file for the CAD reference')
+                            ->downloadable()
+                            ->openable()
+                            ->previewable()
+                            ->imagePreviewHeight('200')
+                            ->columnSpanFull(),
                         Forms\Components\TextInput::make('cad_download')
-                            ->label('CAD Download URL')
+                            ->label('CAD Download URL (Alternative)')
                             ->url()
                             ->maxLength(500)
-                            ->helperText('Enter a URL to the CAD file (PDF, images, or other formats)')
+                            ->helperText('Or enter a direct URL to an external CAD file')
                             ->placeholder('https://example.com/path/to/file.pdf')
-                    ->columnSpanFull(),
+                            ->visible(fn ($record) => !$record?->getMedia('cad_download')->count())
+                            ->columnSpanFull(),
                         Grid::make(2)
                             ->schema([
                                 Forms\Components\ColorPicker::make('tone_on_tone_darker')
@@ -204,13 +217,33 @@ class ProductResource extends Resource
                         );
                     })
                     ->html(),
-                Tables\Columns\TextColumn::make('cad_download')
+                Tables\Columns\TextColumn::make('cad_download_link')
                     ->label('CAD Download')
+                    ->html()
                     ->formatStateUsing(function ($state, $record) {
-                        if (!$state) return 'No CAD';
+                        // Check Media Library first
+                        $mediaFiles = $record->getMedia('cad_download');
+                        if ($mediaFiles->isNotEmpty()) {
+                            $firstMedia = $mediaFiles->first();
+                            $url = $firstMedia->getUrl();
+                            
+                            return new \Illuminate\Support\HtmlString(
+                                '<a href="' . $url . '" target="_blank" style="color: #3b82f6; text-decoration: none;">
+                                    <svg style="width: 16px; height: 16px; display: inline-block; margin-right: 4px; vertical-align: middle;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    View CAD
+                                </a>'
+                            );
+                        }
                         
-                        // Check if it's a URL or a file path
-                        $url = filter_var($state, FILTER_VALIDATE_URL) ? $state : asset('storage/' . $state);
+                        // Fallback to legacy cad_download field
+                        $cadUrl = $record->cad_download;
+                        if (!$cadUrl) {
+                            return 'No CAD';
+                        }
+                        
+                        $url = filter_var($cadUrl, FILTER_VALIDATE_URL) ? $cadUrl : asset('storage/' . $cadUrl);
                         
                         return new \Illuminate\Support\HtmlString(
                             '<a href="' . $url . '" target="_blank" style="color: #3b82f6; text-decoration: none;">
@@ -220,8 +253,7 @@ class ProductResource extends Resource
                                 View CAD
                             </a>'
                         );
-                    })
-                    ->html(),
+                    }),
                 Tables\Columns\TextColumn::make('fabric')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),

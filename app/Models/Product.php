@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\Rule;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Product extends Model
+class Product extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'name',
@@ -230,5 +233,37 @@ class Product extends Model
     public function scopeLowStock($query)
     {
         return $query->whereRaw('stock_quantity <= min_stock_level');
+    }
+
+    /**
+     * Register media collections for the product.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('cad_download')
+            ->acceptsMimeTypes(['application/pdf'])
+            ->singleFile();
+        
+        $this->addMediaCollection('product_images')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+    }
+
+    /**
+     * Register media conversions for CAD PDFs.
+     * 
+     * Note: PDF conversion requires ImageMagick with Ghostscript.
+     * GD driver cannot convert PDFs. Install imagick extension for this feature.
+     */
+    public function registerMediaConversions(Media $media = null): void
+    {
+        // PDF preview conversion - requires imagick extension
+        // Uncomment when imagick is properly configured:
+        // $this->addMediaConversion('preview')
+        //     ->pdf()
+        //     ->format('jpg')
+        //     ->width(300)
+        //     ->height(300)
+        //     ->sharpen(10)
+        //     ->nonQueued();
     }
 }
