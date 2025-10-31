@@ -48,7 +48,7 @@ class ProductResource extends Resource
 
     protected static ?string $navigationGroup = 'Design Tools';
 
-    protected static ?int $navigationSort = -1;
+    protected static ?int $navigationSort = 0;
 
     public static function form(Form $form): Form
     {
@@ -88,25 +88,12 @@ class ProductResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\Hidden::make('base_color_hex')
                             ->default('#FFFFFF'),
-                        Forms\Components\FileUpload::make('cad_download')
-                            ->label('CAD Download')
-                            ->acceptedFileTypes(['application/pdf', 'application/zip', 'application/x-zip-compressed', 'application/octet-stream', 'image/jpeg', 'image/png', 'image/gif', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                            ->directory('cad-files')
-                            ->disk('public')
-                            ->helperText('Upload CAD files (PDF, ZIP, images, or other CAD formats)')
-                            ->downloadable()
-                            ->openable()
-                            ->previewable()
-                            ->getUploadedFileNameForStorageUsing(function ($file, $get) {
-                                $productName = $get('name');
-                                if ($productName) {
-                                    // Clean the product name for filename use
-                                    $cleanName = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $productName);
-                                    $extension = $file->getClientOriginalExtension();
-                                    return $cleanName . '.' . $extension;
-                                }
-                                return $file->getClientOriginalName();
-                            })
+                        Forms\Components\TextInput::make('cad_download')
+                            ->label('CAD Download URL')
+                            ->url()
+                            ->maxLength(500)
+                            ->helperText('Enter a URL to the CAD file (PDF, images, or other formats)')
+                            ->placeholder('https://example.com/path/to/file.pdf')
                     ->columnSpanFull(),
                         Grid::make(2)
                             ->schema([
@@ -168,14 +155,6 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('sku')
-                    ->label('Ethos ID')
-                    ->searchable()
-                    ->sortable()
-                    ->copyable()
-                    ->copyMessage('Ethos ID copied')
-                    ->color('gray')
-                    ->weight('normal'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Product Name')
                     ->searchable()
@@ -201,8 +180,8 @@ class ProductResource extends Resource
                         );
                     })
                     ->html(),
-                Tables\Columns\TextColumn::make('tone_on_tone_lighter')
-                    ->label('Tone on Tone (Lighter)')
+                Tables\Columns\TextColumn::make('tone_on_tone_darker')
+                    ->label('Tone on Tone (Darker)')
                     ->formatStateUsing(function ($state) {
                         if (!$state) return 'N/A';
                         return new \Illuminate\Support\HtmlString(
@@ -213,8 +192,8 @@ class ProductResource extends Resource
                         );
                     })
                     ->html(),
-                Tables\Columns\TextColumn::make('tone_on_tone_darker')
-                    ->label('Tone on Tone (Darker)')
+                Tables\Columns\TextColumn::make('tone_on_tone_lighter')
+                    ->label('Tone on Tone (Lighter)')
                     ->formatStateUsing(function ($state) {
                         if (!$state) return 'N/A';
                         return new \Illuminate\Support\HtmlString(
@@ -229,12 +208,16 @@ class ProductResource extends Resource
                     ->label('CAD Download')
                     ->formatStateUsing(function ($state, $record) {
                         if (!$state) return 'No CAD';
+                        
+                        // Check if it's a URL or a file path
+                        $url = filter_var($state, FILTER_VALIDATE_URL) ? $state : asset('storage/' . $state);
+                        
                         return new \Illuminate\Support\HtmlString(
-                            '<a href="' . asset('storage/' . $state) . '" download="' . basename($state) . '" style="color: #3b82f6; text-decoration: none;">
-                                <svg style="width: 16px; height: 16px; display: inline-block; margin-right: 4px;" fill="currentColor" viewBox="0 0 20 20">
+                            '<a href="' . $url . '" target="_blank" style="color: #3b82f6; text-decoration: none;">
+                                <svg style="width: 16px; height: 16px; display: inline-block; margin-right: 4px; vertical-align: middle;" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
-                                Download
+                                View CAD
                             </a>'
                         );
                     })
@@ -268,12 +251,6 @@ class ProductResource extends Resource
                     ->options(fn () => Product::distinct()->pluck('supplier', 'supplier')->filter()),
                 SelectFilter::make('product_type')
                     ->options(fn () => Product::distinct()->pluck('product_type', 'product_type')->filter()),
-                TernaryFilter::make('has_variants')
-                    ->label('Has Ethos ID\'s')
-                    ->boolean()
-                    ->trueLabel('With Ethos ID\'s')
-                    ->falseLabel('Without Ethos ID\'s')
-                    ->native(false),
                 TernaryFilter::make('is_featured')
                     ->label('Featured Products')
                     ->boolean()
