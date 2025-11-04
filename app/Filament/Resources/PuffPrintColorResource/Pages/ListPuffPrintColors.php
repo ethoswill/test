@@ -5,6 +5,10 @@ namespace App\Filament\Resources\PuffPrintColorResource\Pages;
 use App\Filament\Resources\PuffPrintColorResource;
 use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintHeader;
 use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintMachineSettings;
+use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintMinimums;
+use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintLeadTime;
+use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintPricing;
+use App\Filament\Resources\PuffPrintColorResource\Widgets\PuffPrintVisualReference;
 use App\Models\PuffPrintColor;
 use App\Models\TeamNote;
 use Filament\Actions;
@@ -318,7 +322,17 @@ class ListPuffPrintColors extends ListRecords
     {
         return [
             PuffPrintHeader::class,
+            PuffPrintMinimums::class,
+            PuffPrintLeadTime::class,
+            PuffPrintPricing::class,
             PuffPrintMachineSettings::class,
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            PuffPrintVisualReference::class,
         ];
     }
 }

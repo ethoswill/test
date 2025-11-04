@@ -1,23 +1,5 @@
 <x-filament-widgets::widget>
     <div class="widget-content space-y-4">
-        <!-- Visual Reference Section -->
-        <x-filament::section>
-            <x-slot name="heading">
-                Visual Reference
-            </x-slot>
-            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Sample of 3D puff print on garment showing texture and raised effect
-                </p>
-                <img 
-                    src="https://cdn.shopify.com/s/files/1/0609/4752/9901/files/Screenshot_2025-10-26_at_20.51.27.png?v=1761537098" 
-                    alt="Puff Print Sample" 
-                    class="max-w-2xl w-full h-auto rounded-lg shadow-md"
-                    style="max-height: 500px; object-fit: contain;"
-                >
-            </div>
-        </x-filament::section>
-
         <!-- Team Notes Section -->
         <x-filament::section>
             <x-slot name="header">
