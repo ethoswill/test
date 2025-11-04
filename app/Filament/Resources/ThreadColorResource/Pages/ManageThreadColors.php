@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ThreadColorResource\Pages;
 
 use App\Filament\Resources\ThreadColorResource;
+use App\Filament\Resources\ThreadColorResource\Imports\ThreadColorImporter;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Actions\Action;
@@ -19,7 +20,9 @@ class ManageThreadColors extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            // No bulk actions - individual URL linking only
+            Actions\CreateAction::make(),
+            Actions\ImportAction::make()
+                ->importer(ThreadColorImporter::class),
         ];
     }
 }
