@@ -4,7 +4,7 @@ namespace App\Filament\Resources\PuffPrintColorResource\Widgets;
 
 use App\Models\TeamNote;
 use Filament\Widgets\Widget;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
@@ -55,10 +55,26 @@ class PuffPrintHeader extends Widget
             ->icon('heroicon-o-pencil-square')
             ->color('gray')
             ->form([
-                Textarea::make('content')
+                RichEditor::make('content')
                     ->label('Team Notes')
-                    ->placeholder('Enter notes for your team...')
-                    ->rows(5)
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
                     ->default(fn () => $this->content),
             ])
             ->action(function (array $data): void {
