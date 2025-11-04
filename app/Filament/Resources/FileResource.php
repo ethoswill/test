@@ -39,7 +39,13 @@ class FileResource extends Resource
                 Forms\Components\FileUpload::make('path')
                     ->label('File')
                     ->required()
-                    ->disk('public')
+                    ->disk(function ($record) {
+                        // If we have a full URL, don't use disk - ImageColumn detects URLs automatically
+                        if ($record && $record->file_url && filter_var($record->file_url, FILTER_VALIDATE_URL)) {
+                            return null;
+                        }
+                        return $record && $record->disk ? $record->disk : 'public';
+                    })
                     ->directory('files')
                     ->visibility('public')
                     ->preserveFilenames()
@@ -121,19 +127,28 @@ class FileResource extends Resource
                     ->circular(false)
                     ->getStateUsing(function ($record) {
                         // Only show preview for image files
-                        if ($record && $record->mime_type && str_starts_with($record->mime_type, 'image/')) {
-                            // Use path directly for ImageColumn, it will generate the URL
-                            if ($record->path) {
-                                return $record->path;
-                            }
-                            // Fallback to file_url
-                            if ($record->file_url) {
-                                return $record->file_url;
-                            }
+                        if (!$record || !$record->mime_type || !str_starts_with($record->mime_type, 'image/')) {
+                            return null;
+                        }
+                        
+                        // Prioritize file_url (full URL) - works for both local and remote servers
+                        if ($record->file_url) {
+                            return $record->file_url;
+                        }
+                        
+                        // Fallback to path if URL not available
+                        if ($record->path) {
+                            return $record->path;
                         }
                         return null;
                     })
-                    ->disk('public')
+                    ->disk(function ($record) {
+                        // If we have a full URL, don't use disk - ImageColumn detects URLs automatically
+                        if ($record && $record->file_url && filter_var($record->file_url, FILTER_VALIDATE_URL)) {
+                            return null;
+                        }
+                        return $record && $record->disk ? $record->disk : 'public';
+                    })
                     ->extraImgAttributes([
                         'class' => 'rounded object-cover',
                     ]),
