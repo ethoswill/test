@@ -5,8 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
-use App\Models\Role;
-use App\Models\Permission;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -57,44 +55,6 @@ class UserResource extends Resource
                             ->default(true),
                     ])
                     ->columns(2),
-                
-                Forms\Components\Section::make('Roles & Permissions')
-                    ->schema([
-                        Forms\Components\Select::make('roles')
-                            ->relationship('roles', 'name')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->required()
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                // Auto-populate permissions based on selected roles
-                                if ($state) {
-                                    $permissions = Permission::whereHas('roles', function ($query) use ($state) {
-                                        $query->whereIn('roles.id', $state);
-                                    })->pluck('slug')->toArray();
-                                    $set('permissions', $permissions);
-                                }
-                            }),
-                        
-                        Forms\Components\CheckboxList::make('permissions')
-                            ->label('Individual Permissions')
-                            ->options(function () {
-                                $permissions = Permission::all()->sortBy('resource');
-                                return $permissions->mapWithKeys(function ($permission) {
-                                    return [$permission->slug => $permission->name];
-                                });
-                            })
-                            ->descriptions(function () {
-                                $descriptions = [];
-                                foreach (Permission::all() as $permission) {
-                                    $descriptions[$permission->slug] = $permission->resource;
-                                }
-                                return $descriptions;
-                            })
-                            ->columns(2)
-                            ->searchable(),
-                    ])
-                    ->collapsible(),
             ]);
     }
 
@@ -109,10 +69,6 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('roles.name')
-                    ->label('Roles')
-                    ->badge()
-                    ->color('primary'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),
@@ -128,9 +84,6 @@ class UserResource extends Resource
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Active Users'),
-                Tables\Filters\SelectFilter::make('roles')
-                    ->relationship('roles', 'name')
-                    ->multiple(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -148,21 +101,6 @@ class UserResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('assign_role')
-                        ->label('Assign Role')
-                        ->icon('heroicon-o-user-plus')
-                        ->form([
-                            Forms\Components\Select::make('role')
-                                ->label('Role to Assign')
-                                ->options(Role::active()->pluck('name', 'id'))
-                                ->required(),
-                        ])
-                        ->action(function (array $data, $records) {
-                            $role = Role::find($data['role']);
-                            foreach ($records as $record) {
-                                $record->assignRole($role);
-                            }
-                        }),
                 ]),
             ])
             ->headerActions([
@@ -192,11 +130,6 @@ class UserResource extends Resource
                             'password' => Hash::make($data['password']),
                             'is_active' => true,
                         ]);
-                        
-                        $adminRole = Role::where('slug', 'admin')->first();
-                        if ($adminRole) {
-                            $user->assignRole($adminRole);
-                        }
                     }),
             ]);
     }

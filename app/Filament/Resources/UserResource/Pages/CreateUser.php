@@ -3,8 +3,6 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use App\Models\Permission;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord
@@ -13,30 +11,11 @@ class CreateUser extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Remove permissions from the main data array as we'll handle them separately
-        $permissions = $data['permissions'] ?? [];
-        unset($data['permissions']);
+        // Set the name field from first_name and last_name (required by database)
+        if (!isset($data['name']) && isset($data['first_name']) && isset($data['last_name'])) {
+            $data['name'] = trim($data['first_name'] . ' ' . $data['last_name']);
+        }
         
         return $data;
-    }
-
-    protected function afterCreate(): void
-    {
-        // Handle permissions after user creation
-        $permissions = $this->form->getState()['permissions'] ?? [];
-        
-        if (!empty($permissions)) {
-            $permissionIds = Permission::whereIn('slug', $permissions)->pluck('id');
-            
-            // Create a temporary role for individual permissions
-            $individualRole = \App\Models\Role::firstOrCreate([
-                'slug' => 'individual-permissions-' . $this->record->id,
-                'name' => 'Individual Permissions - ' . $this->record->full_name,
-                'description' => 'Individual permissions for ' . $this->record->full_name,
-            ]);
-            
-            $individualRole->permissions()->sync($permissionIds);
-            $this->record->assignRole($individualRole);
-        }
     }
 }
