@@ -119,8 +119,9 @@ class ProductResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('cad_download')
                             ->label('CAD Download URL (Alternative)')
-                            ->url()
+                            ->nullable()
                             ->maxLength(500)
+                            ->rules(['nullable', 'url'])
                             ->helperText('Or enter a direct URL to an external CAD file')
                             ->placeholder('https://example.com/path/to/file.pdf')
                             ->visible(fn ($record) => !$record?->getMedia('cad_download')->count())

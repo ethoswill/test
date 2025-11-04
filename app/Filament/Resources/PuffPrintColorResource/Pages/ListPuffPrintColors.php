@@ -12,6 +12,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ListPuffPrintColors extends ListRecords
 {
@@ -38,17 +40,136 @@ class ListPuffPrintColors extends ListRecords
                 ])
                 ->action(function (array $data) {
                     try {
-                        $filePath = storage_path('app/' . $data['color_file']);
-                        
-                        if (!file_exists($filePath)) {
+                        if (empty($data['color_file'])) {
                             Notification::make()
-                                ->title('File not found')
+                                ->title('No file uploaded')
                                 ->danger()
                                 ->send();
                             return;
                         }
                         
-                        $fileContent = file_get_contents($filePath);
+                        $fileContent = null;
+                        $fileToCleanup = null;
+                        $disk = Storage::disk('local');
+                        
+                        // Handle different file upload formats
+                        $uploadedFile = $data['color_file'];
+                        
+                        // Handle array (if multiple files allowed)
+                        if (is_array($uploadedFile)) {
+                            $uploadedFile = $uploadedFile[0] ?? null;
+                        }
+                        
+                        if (!$uploadedFile) {
+                            Notification::make()
+                                ->title('No file uploaded')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+                        
+                        // If it's a TemporaryUploadedFile object, store it first then read it
+                        if ($uploadedFile instanceof TemporaryUploadedFile) {
+                            // Store the file to our specified location first
+                            // This ensures we have a known path to read from
+                            $filename = $uploadedFile->getClientOriginalName() ?: 'color-import-' . time() . '.txt';
+                            
+                            try {
+                                // Store the file using storeAs (private visibility since disk is 'local')
+                                $storedPath = $uploadedFile->storeAs('color-imports', $filename, 'local');
+                                
+                                if ($storedPath && $disk->exists($storedPath)) {
+                                    $fileContent = $disk->get($storedPath);
+                                    $fileToCleanup = $storedPath;
+                                } else {
+                                    // Fallback: try reading directly from the TemporaryUploadedFile
+                                    try {
+                                        $fileContent = $uploadedFile->get();
+                                        $fileToCleanup = $uploadedFile->getPathname();
+                                    } catch (\Exception $e) {
+                                        // Last resort: try getRealPath
+                                        $tempPath = $uploadedFile->getRealPath();
+                                        if ($tempPath && file_exists($tempPath)) {
+                                            $fileContent = file_get_contents($tempPath);
+                                            $fileToCleanup = $tempPath;
+                                        }
+                                    }
+                                }
+                            } catch (\Exception $e) {
+                                // If storeAs fails, try reading directly
+                                try {
+                                    $fileContent = $uploadedFile->get();
+                                    $fileToCleanup = $uploadedFile->getPathname();
+                                } catch (\Exception $e2) {
+                                    $tempPath = $uploadedFile->getRealPath();
+                                    if ($tempPath && file_exists($tempPath)) {
+                                        $fileContent = file_get_contents($tempPath);
+                                        $fileToCleanup = $tempPath;
+                                    }
+                                }
+                            }
+                        } 
+                        // If it's a string path
+                        elseif (is_string($uploadedFile)) {
+                            // The path might be relative to the disk root or absolute
+                            // Try multiple path formats
+                            $possiblePaths = [
+                                $uploadedFile,
+                                'color-imports/' . $uploadedFile,
+                                'color-imports/' . basename($uploadedFile),
+                                str_replace('color-imports/', '', $uploadedFile),
+                                str_replace('color-imports/', '', basename($uploadedFile)),
+                                ltrim($uploadedFile, '/'),
+                            ];
+                            
+                            $foundPath = null;
+                            foreach ($possiblePaths as $path) {
+                                $path = ltrim($path, '/');
+                                if ($disk->exists($path)) {
+                                    $foundPath = $path;
+                                    break;
+                                }
+                            }
+                            
+                            if ($foundPath) {
+                                $fileContent = $disk->get($foundPath);
+                                $fileToCleanup = $foundPath;
+                            } else {
+                                // Try full paths (disk root is storage_path('app/private'))
+                                $fullPaths = [
+                                    storage_path('app/private/' . ltrim($uploadedFile, '/')),
+                                    storage_path('app/private/color-imports/' . basename($uploadedFile)),
+                                    storage_path('app/private/color-imports/' . $uploadedFile),
+                                    storage_path('app/livewire-tmp/' . basename($uploadedFile)),
+                                    storage_path('app/' . ltrim($uploadedFile, '/')),
+                                ];
+                                
+                                foreach ($fullPaths as $fullPath) {
+                                    if (file_exists($fullPath)) {
+                                        $fileContent = file_get_contents($fullPath);
+                                        $fileToCleanup = $fullPath;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (!$fileContent) {
+                            // Provide detailed error with attempted paths
+                            $debugInfo = '';
+                            if (is_string($uploadedFile)) {
+                                $debugInfo = 'Attempted path: ' . $uploadedFile;
+                            } elseif ($uploadedFile instanceof TemporaryUploadedFile) {
+                                $debugInfo = 'File: ' . $uploadedFile->getFilename();
+                            }
+                            
+                            Notification::make()
+                                ->title('File not found')
+                                ->body('Could not read uploaded file. ' . $debugInfo)
+                                ->danger()
+                                ->send();
+                            return;
+                        }
                         $lines = explode("\n", $fileContent);
                         
                         $updated = 0;
@@ -104,8 +225,16 @@ class ListPuffPrintColors extends ListRecords
                         }
                         
                         // Clean up uploaded file
-                        if (file_exists($filePath)) {
-                            unlink($filePath);
+                        if ($fileToCleanup) {
+                            try {
+                                if (is_string($fileToCleanup) && $disk->exists($fileToCleanup)) {
+                                    $disk->delete($fileToCleanup);
+                                } elseif (file_exists($fileToCleanup)) {
+                                    @unlink($fileToCleanup);
+                                }
+                            } catch (\Exception $e) {
+                                // Ignore cleanup errors
+                            }
                         }
                         
                         $message = "Color codes import completed! ";
