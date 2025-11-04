@@ -124,9 +124,12 @@ class ViewProduct extends ViewRecord
                     Forms\Components\Placeholder::make('cad_download')
                         ->label('CAD Download')
                         ->content(function ($record) {
-                            if ($record->cad_download) {
+                            $mediaFiles = $record->getMedia('cad_download');
+                            if ($mediaFiles->isNotEmpty()) {
+                                $firstMedia = $mediaFiles->first();
+                                $url = $firstMedia->getUrl();
                                 return new \Illuminate\Support\HtmlString(
-                                    '<a href="' . asset('storage/' . $record->cad_download) . '" download style="color: #3b82f6; text-decoration: underline;">Download CAD File</a>'
+                                    '<a href="' . $url . '" target="_blank" download style="color: #3b82f6; text-decoration: underline;">Download CAD File</a>'
                                 );
                             }
                             return 'No CAD file uploaded';
