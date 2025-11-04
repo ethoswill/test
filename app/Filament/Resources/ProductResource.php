@@ -35,6 +35,8 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\Repeater;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Response;
 
 class ProductResource extends Resource
 {
@@ -76,6 +78,21 @@ class ProductResource extends Resource
                                 Forms\Components\TextInput::make('product_type')
                                     ->label('Product Type')
                                     ->maxLength(100),
+                            ]),
+                        Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('price')
+                                    ->label('Price')
+                                    ->numeric()
+                                    ->default(0.00)
+                                    ->prefix('$')
+                                    ->step(0.01),
+                                Forms\Components\TextInput::make('cost')
+                                    ->label('Cost')
+                                    ->numeric()
+                                    ->default(0.00)
+                                    ->prefix('$')
+                                    ->step(0.01),
                             ]),
                         Forms\Components\ColorPicker::make('base_color')
                             ->label('Base Color (Illustrator)')
@@ -176,6 +193,23 @@ class ProductResource extends Resource
                     ->description(fn ($record) => $record->product_type)
                     ->url(fn ($record) => route('filament.admin.resources.products.view', $record))
                     ->color('primary'),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        'inactive' => 'warning',
+                        'discontinued' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
+                        'discontinued' => 'Discontinued',
+                        default => $state,
+                    })
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('supplier')
                     ->searchable()
                     ->sortable()
@@ -277,7 +311,6 @@ class ProductResource extends Resource
                         'active' => 'Active',
                         'inactive' => 'Inactive',
                         'discontinued' => 'Discontinued',
-                        'supplier_product' => 'Supplier Product',
                     ]),
                 SelectFilter::make('supplier')
                     ->options(fn () => Product::distinct()->pluck('supplier', 'supplier')->filter()),
@@ -296,8 +329,409 @@ class ProductResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->where('stock_quantity', 0))
                     ->toggle(),
             ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('update_status')
+                        ->label('Update Status')
+                        ->icon('heroicon-o-check-circle')
+                        ->form([
+                            Forms\Components\Select::make('status')
+                                ->label('Status')
+                                ->options([
+                                    'active' => 'Active',
+                                    'inactive' => 'Inactive',
+                                    'discontinued' => 'Discontinued',
+                                ])
+                                ->required()
+                                ->default('active'),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update(['status' => $data['status']]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Status updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s) to ' . $data['status'])
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('update_supplier')
+                        ->label('Update Supplier')
+                        ->icon('heroicon-o-building-office')
+                        ->form([
+                            Forms\Components\TextInput::make('supplier')
+                                ->label('Supplier')
+                                ->maxLength(100),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update(['supplier' => $data['supplier']]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Supplier updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s)')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('update_product_type')
+                        ->label('Update Product Type')
+                        ->icon('heroicon-o-tag')
+                        ->form([
+                            Forms\Components\TextInput::make('product_type')
+                                ->label('Product Type')
+                                ->maxLength(100),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update(['product_type' => $data['product_type']]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Product Type updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s)')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('update_base_color')
+                        ->label('Update Base Color')
+                        ->icon('heroicon-o-paint-brush')
+                        ->form([
+                            Forms\Components\ColorPicker::make('base_color')
+                                ->label('Base Color')
+                                ->required(),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update([
+                                    'base_color' => $data['base_color'],
+                                    'base_color_hex' => $data['base_color'],
+                                ]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Base Color updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s)')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('update_tone_darker')
+                        ->label('Update Tone on Tone (Darker)')
+                        ->icon('heroicon-o-swatch')
+                        ->form([
+                            Forms\Components\ColorPicker::make('tone_on_tone_darker')
+                                ->label('Tone on Tone (Darker Color)')
+                                ->required(),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update([
+                                    'tone_on_tone_darker' => $data['tone_on_tone_darker'],
+                                    'tone_on_tone_darker_hex' => $data['tone_on_tone_darker'],
+                                ]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Tone on Tone (Darker) updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s)')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('update_tone_lighter')
+                        ->label('Update Tone on Tone (Lighter)')
+                        ->icon('heroicon-o-swatch')
+                        ->form([
+                            Forms\Components\ColorPicker::make('tone_on_tone_lighter')
+                                ->label('Tone on Tone (Lighter Color)')
+                                ->required(),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update([
+                                    'tone_on_tone_lighter' => $data['tone_on_tone_lighter'],
+                                    'tone_on_tone_lighter_hex' => $data['tone_on_tone_lighter'],
+                                ]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Tone on Tone (Lighter) updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s)')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('update_fabric')
+                        ->label('Update Fabric')
+                        ->icon('heroicon-o-squares-2x2')
+                        ->form([
+                            Forms\Components\TextInput::make('fabric')
+                                ->label('Fabric')
+                                ->maxLength(255),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update(['fabric' => $data['fabric']]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Fabric updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s)')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('update_available_sizes')
+                        ->label('Update Available Sizes')
+                        ->icon('heroicon-o-list-bullet')
+                        ->form([
+                            Forms\Components\TextInput::make('available_sizes')
+                                ->label('Available Sizes')
+                                ->helperText('Enter sizes separated by commas (e.g., S, M, L, XL)')
+                                ->maxLength(255),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $records->each(function (Product $record) use ($data) {
+                                $record->update(['available_sizes' => $data['available_sizes']]);
+                            });
+                            
+                            Notification::make()
+                                ->title('Available Sizes updated successfully')
+                                ->success()
+                                ->body('Updated ' . $records->count() . ' product(s)')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
                 ->actions([])
             ->headerActions([
+                Tables\Actions\Action::make('upload_csv')
+                    ->label('Upload CSV')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\FileUpload::make('csv_file')
+                            ->label('CSV File')
+                            ->required()
+                            ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'text/plain'])
+                            ->helperText(function () {
+                                $url = route('filament.admin.resources.products.download-csv-template');
+                                return new HtmlString('Upload a CSV file with product data. Columns should match product fields. <br><a href="' . $url . '" target="_blank" class="text-primary-600 hover:underline font-medium mt-2 inline-block">📥 Download sample CSV template</a>');
+                            })
+                            ->disk('local')
+                            ->directory('csv-imports')
+                            ->visibility('private'),
+                        Forms\Components\Checkbox::make('update_existing')
+                            ->label('Update existing products')
+                            ->helperText('If checked, products with matching SKU will be updated. Otherwise, new products will be created.')
+                            ->default(false),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $filePath = storage_path('app/' . $data['csv_file']);
+                            
+                            if (!file_exists($filePath)) {
+                                Notification::make()
+                                    ->title('File not found')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            
+                            $handle = fopen($filePath, 'r');
+                            if (!$handle) {
+                                Notification::make()
+                                    ->title('Could not read CSV file')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            
+                            // Read header row
+                            $headers = fgetcsv($handle);
+                            if (!$headers) {
+                                fclose($handle);
+                                Notification::make()
+                                    ->title('CSV file is empty or invalid')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            
+                            // Normalize headers (trim, lowercase)
+                            $headers = array_map(function($header) {
+                                return strtolower(trim($header));
+                            }, $headers);
+                            
+                            $imported = 0;
+                            $updated = 0;
+                            $errors = [];
+                            $rowNumber = 1;
+                            
+                            // Process each row
+                            while (($row = fgetcsv($handle)) !== false) {
+                                $rowNumber++;
+                                
+                                if (count($row) !== count($headers)) {
+                                    $errors[] = "Row {$rowNumber}: Column count mismatch";
+                                    continue;
+                                }
+                                
+                                try {
+                                    $productData = [];
+                                    
+                                    // Map CSV columns to product fields
+                                    foreach ($headers as $index => $header) {
+                                        $value = trim($row[$index] ?? '');
+                                        
+                                        if ($value === '') {
+                                            continue;
+                                        }
+                                        
+                                        // Map header to field name
+                                        $fieldMap = [
+                                            'name' => 'name',
+                                            'sku' => 'sku',
+                                            'description' => 'description',
+                                            'price' => 'price',
+                                            'cost' => 'cost',
+                                            'stock_quantity' => 'stock_quantity',
+                                            'min_stock_level' => 'min_stock_level',
+                                            'category' => 'category',
+                                            'brand' => 'brand',
+                                            'status' => 'status',
+                                            'weight' => 'weight',
+                                            'dimensions' => 'dimensions',
+                                            'barcode' => 'barcode',
+                                            'is_featured' => 'is_featured',
+                                            'website_url' => 'website_url',
+                                            'hs_code' => 'hs_code',
+                                            'parent_product' => 'parent_product',
+                                            'supplier' => 'supplier',
+                                            'product_type' => 'product_type',
+                                            'fabric' => 'fabric',
+                                            'care_instructions' => 'care_instructions',
+                                            'lead_times' => 'lead_times',
+                                            'available_sizes' => 'available_sizes',
+                                            'customization_methods' => 'customization_methods',
+                                            'model_size' => 'model_size',
+                                            'starting_from_price' => 'starting_from_price',
+                                            'minimums' => 'minimums',
+                                            'has_variants' => 'has_variants',
+                                            'notes' => 'notes',
+                                            'cad_download' => 'cad_download',
+                                            'tone_on_tone_lighter' => 'tone_on_tone_lighter',
+                                            'tone_on_tone_darker' => 'tone_on_tone_darker',
+                                            'base_color' => 'base_color',
+                                        ];
+                                        
+                                        $fieldName = $fieldMap[$header] ?? null;
+                                        
+                                        if ($fieldName) {
+                                            // Handle boolean fields
+                                            if (in_array($fieldName, ['is_featured', 'has_variants'])) {
+                                                $productData[$fieldName] = in_array(strtolower($value), ['1', 'true', 'yes', 'on']);
+                                            }
+                                            // Handle numeric fields
+                                            elseif (in_array($fieldName, ['price', 'cost', 'stock_quantity', 'min_stock_level', 'weight', 'starting_from_price'])) {
+                                                $productData[$fieldName] = is_numeric($value) ? $value : 0;
+                                            }
+                                            // Handle color fields - set hex values too
+                                            elseif (in_array($fieldName, ['base_color', 'tone_on_tone_lighter', 'tone_on_tone_darker'])) {
+                                                $productData[$fieldName] = $value;
+                                                $productData[$fieldName . '_hex'] = $value;
+                                            }
+                                            // Default: string value
+                                            else {
+                                                $productData[$fieldName] = $value;
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (empty($productData['name'])) {
+                                        $errors[] = "Row {$rowNumber}: Name is required";
+                                        continue;
+                                    }
+                                    
+                                    // Set defaults for required fields
+                                    $productData = array_merge([
+                                        'status' => 'active',
+                                        'price' => 0.00,
+                                        'cost' => 0.00,
+                                        'stock_quantity' => 0,
+                                        'min_stock_level' => 0,
+                                        'is_featured' => false,
+                                        'has_variants' => false,
+                                    ], $productData);
+                                    
+                                    // Generate SKU if not provided
+                                    if (empty($productData['sku'])) {
+                                        $productData['sku'] = 'SKU-' . time() . '-' . mt_rand(1000, 9999);
+                                    }
+                                    
+                                    // Check if product exists
+                                    $existingProduct = null;
+                                    if (!empty($productData['sku'])) {
+                                        $existingProduct = Product::where('sku', $productData['sku'])->first();
+                                    }
+                                    
+                                    if ($existingProduct && $data['update_existing']) {
+                                        $existingProduct->update($productData);
+                                        $updated++;
+                                    } elseif (!$existingProduct) {
+                                        Product::create($productData);
+                                        $imported++;
+                                    } else {
+                                        $errors[] = "Row {$rowNumber}: Product with SKU '{$productData['sku']}' already exists";
+                                    }
+                                    
+                                } catch (\Exception $e) {
+                                    $errors[] = "Row {$rowNumber}: " . $e->getMessage();
+                                }
+                            }
+                            
+                            fclose($handle);
+                            
+                            // Clean up uploaded file
+                            if (file_exists($filePath)) {
+                                unlink($filePath);
+                            }
+                            
+                            $message = "CSV import completed! ";
+                            $message .= "Imported: {$imported} new product(s). ";
+                            if ($updated > 0) {
+                                $message .= "Updated: {$updated} existing product(s). ";
+                            }
+                            if (!empty($errors)) {
+                                $errorCount = count($errors);
+                                $message .= "Errors: {$errorCount} row(s). ";
+                                if ($errorCount <= 5) {
+                                    $message .= "First errors: " . implode(', ', array_slice($errors, 0, 5));
+                                } else {
+                                    $message .= "First 5 errors: " . implode(', ', array_slice($errors, 0, 5)) . " and " . ($errorCount - 5) . " more.";
+                                }
+                            }
+                            
+                            Notification::make()
+                                ->title($message)
+                                ->success()
+                                ->send();
+                                
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('CSV Import Error: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->modalWidth('2xl'),
                 Tables\Actions\Action::make('google_sheets_template')
                     ->label('Google Sheets Template')
                     ->icon('heroicon-o-document-text')
