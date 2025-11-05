@@ -7,6 +7,8 @@ use App\Filament\Resources\SockResource\RelationManagers;
 use App\Models\Sock;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -68,6 +70,61 @@ class SockResource extends Resource
                             ->label('Minimums')
                             ->maxLength(255)
                             ->placeholder('e.g., 12 pairs, 24 pairs'),
+                    ])
+                    ->columns(2),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make('Sock Information')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('name')
+                            ->label('Sock Style')
+                            ->size(Infolists\Components\TextEntry\TextEntrySize::Large)
+                            ->weight('bold'),
+                        Infolists\Components\TextEntry::make('description')
+                            ->label('Bullet Points')
+                            ->formatStateUsing(function (?string $state): string {
+                                if (empty($state)) {
+                                    return 'No description';
+                                }
+                                $lines = array_filter(array_map('trim', explode("\n", $state)));
+                                return implode("\n• ", array_map(function($line) {
+                                    return ltrim($line, '• -');
+                                }, $lines));
+                            })
+                            ->markdown()
+                            ->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('images')
+                            ->label('Sock Image URLs')
+                            ->formatStateUsing(function ($state) {
+                                if (is_array($state) && !empty($state)) {
+                                    return implode("\n", $state);
+                                }
+                                if (is_string($state)) {
+                                    return $state;
+                                }
+                                return 'No images';
+                            })
+                            ->markdown()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(1),
+                
+                Infolists\Components\Section::make('Specifications')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('ribbing_height')
+                            ->label('Height of Sock Ribbing'),
+                        Infolists\Components\TextEntry::make('fabric')
+                            ->label('Fabric'),
+                        Infolists\Components\TextEntry::make('price')
+                            ->label('Starting Price')
+                            ->money('USD'),
+                        Infolists\Components\TextEntry::make('minimums')
+                            ->label('Minimums'),
                     ])
                     ->columns(2),
             ]);
