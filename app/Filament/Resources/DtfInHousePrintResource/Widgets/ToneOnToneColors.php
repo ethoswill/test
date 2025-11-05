@@ -24,6 +24,10 @@ class ToneOnToneColors extends Widget implements HasActions
     protected static bool $isLazy = false;
 
     public $colors = [];
+    
+    // Required properties for modal rendering
+    public bool $hasFormsModalRendered = false;
+    public bool $hasInfolistsModalRendered = false;
 
     public function mount(): void
     {
