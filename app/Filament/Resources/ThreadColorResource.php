@@ -34,6 +34,9 @@ class ThreadColorResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Color Code'),
+                Forms\Components\ColorPicker::make('hex_code')
+                    ->label('Hex Code')
+                    ->helperText('Select the hex color code for this thread'),
                 Forms\Components\TextInput::make('image_url')
                     ->label('Thread Color Image URL')
                     ->url()
@@ -59,6 +62,23 @@ class ThreadColorResource extends Resource
                     ->color('primary'),
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Swatch Image'),
+                Tables\Columns\TextColumn::make('hex_code')
+                    ->label('Hex Code')
+                    ->searchable()
+                    ->sortable()
+                    ->formatStateUsing(function ($state, $record) {
+                        if (!$state) {
+                            return '—';
+                        }
+                        
+                        // Display color swatch and hex code
+                        $hex = strtoupper($state);
+                        return view('filament.resources.thread-color-resource.columns.hex-code', [
+                            'hex' => $hex,
+                            'color' => $state,
+                        ])->render();
+                    })
+                    ->html(),
                 Tables\Columns\TextColumn::make('used_in')
                     ->label('Used In')
                     ->searchable()

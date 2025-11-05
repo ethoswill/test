@@ -8,7 +8,17 @@
                     </svg>
                     <span>DTF Tone on Tone Colors</span>
                 </div>
-                {{ $this->editColors() }}
+                @php
+                    // Ensure actions are cached first
+                    $this->getActions();
+                    // Then get the cached action
+                    $action = $this->getAction('edit_colors');
+                @endphp
+                @if($action)
+                    {{ $action }}
+                @else
+                    {{ $this->editColors() }}
+                @endif
             </div>
         </x-slot>
         <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -61,5 +71,8 @@
             @endif
         </div>
     </x-filament::section>
+    
+    {{-- Render modal for widget actions --}}
+    <x-filament-actions::modals />
 </x-filament-widgets::widget>
 

@@ -33,6 +33,13 @@ class ToneOnToneColors extends Widget implements HasActions
         );
         
         $this->colors = json_decode($widget->content ?: '[]', true) ?: [];
+        
+        // Cache actions on mount to ensure they're available
+        foreach ($this->getActions() as $action) {
+            if ($action instanceof Action) {
+                $this->cacheAction($action);
+            }
+        }
     }
 
     public function editColors(): Action

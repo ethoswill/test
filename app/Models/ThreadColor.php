@@ -9,6 +9,7 @@ class ThreadColor extends Model
     protected $fillable = [
         'color_name',
         'color_code',
+        'hex_code',
         'image_url',
         'used_in',
     ];
