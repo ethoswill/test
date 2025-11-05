@@ -30,13 +30,21 @@ class ThreadColorResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Thread Number'),
-                Forms\Components\TextInput::make('color_code')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Color Code'),
                 Forms\Components\ColorPicker::make('hex_code')
-                    ->label('Hex Code')
-                    ->helperText('Select the hex color code for this thread'),
+                    ->label('Color Code / Hex Code')
+                    ->required()
+                    ->helperText('Select the hex color code for this thread')
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        // Sync hex_code to color_code
+                        $set('color_code', $state);
+                    })
+                    ->default(fn ($record) => $record?->color_code ?: $record?->hex_code),
+                Forms\Components\TextInput::make('color_code')
+                    ->label('Color Code (Auto-filled)')
+                    ->disabled()
+                    ->dehydrated()
+                    ->helperText('Automatically synced from hex code')
+                    ->default(fn ($record) => $record?->hex_code ?: $record?->color_code),
                 Forms\Components\TextInput::make('image_url')
                     ->label('Thread Color Image URL')
                     ->url()
@@ -63,19 +71,22 @@ class ThreadColorResource extends Resource
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Swatch Image'),
                 Tables\Columns\TextColumn::make('hex_code')
-                    ->label('Hex Code')
+                    ->label('Color Code / Hex Code')
                     ->searchable()
                     ->sortable()
                     ->formatStateUsing(function ($state, $record) {
-                        if (!$state) {
+                        // Use hex_code if available, fallback to color_code
+                        $colorValue = $state ?: $record->color_code;
+                        
+                        if (!$colorValue) {
                             return '—';
                         }
                         
                         // Display color swatch and hex code
-                        $hex = strtoupper($state);
+                        $hex = strtoupper($colorValue);
                         return view('filament.resources.thread-color-resource.columns.hex-code', [
                             'hex' => $hex,
-                            'color' => $state,
+                            'color' => $colorValue,
                         ])->render();
                     })
                     ->html(),
