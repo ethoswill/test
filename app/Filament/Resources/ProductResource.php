@@ -230,11 +230,11 @@ class ProductResource extends Resource
                         $mediaFiles = $record->getMedia('cad_download');
                         if ($mediaFiles->isNotEmpty()) {
                             $firstMedia = $mediaFiles->first();
-                            $url = $firstMedia->getUrl();
+                            $downloadUrl = route('filament.admin.media.download', $firstMedia->id);
                             $fileName = $firstMedia->file_name;
                             
                             return new \Illuminate\Support\HtmlString(
-                                '<a href="' . $url . '" target="_blank" download style="color: #3b82f6; text-decoration: underline; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                '<a href="' . $downloadUrl . '" target="_blank" download="' . htmlspecialchars($fileName) . '" style="color: #3b82f6; text-decoration: underline; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
                                     <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                     </svg>
