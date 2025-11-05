@@ -78,6 +78,18 @@ class ManageThreadColors extends ManageRecords
                 })
                 ->modalHeading('Add Thread Colors from Text')
                 ->modalSubmitActionLabel('Add Rows'),
+            Action::make('download_swatches')
+                ->label('Download Thread Color Swatches')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('info')
+                ->action(function (): void {
+                    // TODO: Map file download functionality
+                    Notification::make()
+                        ->title('Download functionality coming soon')
+                        ->body('The download feature will be implemented soon.')
+                        ->info()
+                        ->send();
+                }),
         ];
     }
 }
