@@ -5,10 +5,12 @@ namespace App\Filament\Resources\ThreadBookColorResource\Pages;
 use App\Filament\Resources\ThreadBookColorResource;
 use App\Filament\Resources\ThreadBookColorResource\Widgets\ThreadBookColorsHeader;
 use App\Models\TeamNote;
+use App\Models\ThreadBookColor;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Forms;
 
 class ListThreadBookColors extends ListRecords
 {
@@ -29,6 +31,65 @@ class ListThreadBookColors extends ListRecords
                 ->icon('heroicon-o-plus')
                 ->color('success')
                 ->url(ThreadBookColorResource::getUrl('create')),
+            Action::make('add_rows')
+                ->label('Add Rows')
+                ->icon('heroicon-o-plus-circle')
+                ->color('primary')
+                ->form([
+                    Forms\Components\Textarea::make('rows')
+                        ->label('Paste Thread Book Colors')
+                        ->placeholder('Paste one thread book color per line (e.g., Navy Blue or Navy Blue|#000080)')
+                        ->helperText('Each line will create a new thread book color. Only color name is required. Optional: Add hex code using pipe format (Color Name|#HEXCODE)')
+                        ->rows(10)
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    $rows = $data['rows'];
+                    $lines = array_filter(array_map('trim', explode("\n", $rows)));
+                    
+                    $created = 0;
+                    $skipped = 0;
+                    
+                    foreach ($lines as $line) {
+                        if (empty($line)) {
+                            continue;
+                        }
+                        
+                        // Parse the line - support pipe-separated format: name|hex_code
+                        $parts = explode('|', $line);
+                        $colorName = trim($parts[0]);
+                        $hexCode = isset($parts[1]) ? trim($parts[1]) : null;
+                        
+                        if (empty($colorName)) {
+                            $skipped++;
+                            continue;
+                        }
+                        
+                        // Check if thread book color already exists
+                        $existing = ThreadBookColor::where('name', $colorName)->first();
+                        if ($existing) {
+                            $skipped++;
+                            continue;
+                        }
+                        
+                        // Create new thread book color
+                        ThreadBookColor::create([
+                            'name' => $colorName,
+                            'color_code' => $hexCode ?: null,
+                            'hex_code' => $hexCode ?: null,
+                        ]);
+                        
+                        $created++;
+                    }
+                    
+                    Notification::make()
+                        ->title('Thread book colors added successfully!')
+                        ->body("Created {$created} new thread book color(s). " . ($skipped > 0 ? "{$skipped} skipped (already exist or invalid)." : ''))
+                        ->success()
+                        ->send();
+                })
+                ->modalHeading('Add Thread Book Colors from Text')
+                ->modalSubmitActionLabel('Add Rows'),
         ];
 
         // Add download button
