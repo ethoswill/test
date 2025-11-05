@@ -10,6 +10,8 @@ use App\Filament\Resources\DtfInHousePrintResource\Widgets\IccProfiling;
 use App\Filament\Resources\DtfInHousePrintResource\Widgets\CareOfDtfGarment;
 use App\Filament\Resources\DtfInHousePrintResource\Widgets\LeadTimesMinimums;
 use App\Filament\Resources\DtfInHousePrintResource\Widgets\CareInstructions;
+use App\Filament\Resources\DtfInHousePrintResource\Widgets\PressSettings;
+use App\Filament\Resources\DtfInHousePrintResource\Widgets\ToneOnToneColors;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 
@@ -36,6 +38,8 @@ class ManageDtfInHousePrints extends Page
             ContactInfo::class,
             IccProfiling::class,
             CareOfDtfGarment::class,
+            PressSettings::class,
+            ToneOnToneColors::class,
         ];
     }
 

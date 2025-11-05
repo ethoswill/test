@@ -17,17 +17,25 @@ class ThreadColorImporter extends Importer
             ImportColumn::make('color_name')
                 ->label('Thread Number')
                 ->required()
-                ->rules(['required', 'string', 'max:255']),
+                ->rules(['required', 'string', 'max:255'])
+                ->helperText('The thread number/identifier (e.g., 1001, 1002)')
+                ->example('1001'),
             ImportColumn::make('color_code')
                 ->label('Color Code')
                 ->required()
-                ->rules(['required', 'string', 'max:255']),
+                ->rules(['required', 'string', 'max:255'])
+                ->helperText('The color name (e.g., White, Black, Red)')
+                ->example('White'),
             ImportColumn::make('image_url')
                 ->label('Thread Color Image URL')
-                ->rules(['nullable', 'url', 'max:500']),
+                ->rules(['nullable', 'url', 'max:500'])
+                ->helperText('Full URL to the thread color swatch image (e.g., https://cdn.shopify.com/s/files/1/.../thread-white-1001.png)')
+                ->example('https://cdn.shopify.com/s/files/1/0609/4752/9901/files/thread-white-1001.png'),
             ImportColumn::make('used_in')
                 ->label('Used In')
-                ->rules(['nullable', 'string']),
+                ->rules(['nullable', 'string'])
+                ->helperText('List product colors where this thread is used (comma-separated, optional)')
+                ->example('White T-Shirts, Cream Products'),
         ];
     }
 

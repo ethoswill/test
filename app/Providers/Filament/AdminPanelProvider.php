@@ -55,7 +55,6 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Pages\CustomDashboard::class,
                 \App\Filament\Pages\ProfileSettings::class,
                 \App\Filament\Pages\ManageDtfInHousePrints::class,
-                \App\Filament\Pages\PressSettings::class,
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
