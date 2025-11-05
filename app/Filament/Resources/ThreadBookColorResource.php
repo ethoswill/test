@@ -131,10 +131,12 @@ class ThreadBookColorResource extends Resource
             ], layout: Tables\Enums\FiltersLayout::Dropdown)
             ->persistFiltersInSession()
             ->filtersLayout(Tables\Enums\FiltersLayout::Dropdown)
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ])
             ->actions([
                 // No actions - clicking the color name will navigate to view page
-            ])
-            ->checkIfRecordIsSelectableUsing(fn () => false);
+            ]);
     }
 
     public static function getRelations(): array
