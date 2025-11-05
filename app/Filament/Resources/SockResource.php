@@ -99,17 +99,40 @@ class SockResource extends Resource
                             ->markdown()
                             ->columnSpanFull(),
                         Infolists\Components\TextEntry::make('images')
-                            ->label('Sock Image URLs')
-                            ->formatStateUsing(function ($state) {
-                                if (is_array($state) && !empty($state)) {
-                                    return implode("\n", $state);
+                            ->label('Gallery')
+                            ->formatStateUsing(function ($state, $record) {
+                                $imageUrls = [];
+                                
+                                // Get images from the record
+                                if (is_array($record->images)) {
+                                    $imageUrls = array_filter($record->images);
+                                } elseif (is_string($record->images)) {
+                                    $decoded = json_decode($record->images, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                        $imageUrls = array_filter($decoded);
+                                    } else {
+                                        $imageUrls = array_filter(array_map('trim', explode("\n", $record->images)));
+                                    }
                                 }
-                                if (is_string($state)) {
-                                    return $state;
+                                
+                                if (empty($imageUrls)) {
+                                    return '<p class="text-gray-500 dark:text-gray-400">No images</p>';
                                 }
-                                return 'No images';
+                                
+                                $html = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">';
+                                foreach ($imageUrls as $index => $url) {
+                                    $url = trim($url);
+                                    if (!empty($url)) {
+                                        $html .= '<div class="relative aspect-square overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">';
+                                        $html .= '<img src="' . htmlspecialchars($url) . '" alt="Sock image ' . ($index + 1) . '" class="w-full h-full object-cover" loading="lazy" />';
+                                        $html .= '</div>';
+                                    }
+                                }
+                                $html .= '</div>';
+                                
+                                return $html;
                             })
-                            ->markdown()
+                            ->html()
                             ->columnSpanFull(),
                     ])
                     ->columns(1),
