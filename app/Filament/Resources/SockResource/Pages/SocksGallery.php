@@ -82,6 +82,10 @@ class SocksGallery extends ListRecords
                                 ->numeric()
                                 ->prefix('$')
                                 ->placeholder('0.00'),
+                            TextInput::make('minimums')
+                                ->label('Minimums')
+                                ->maxLength(255)
+                                ->placeholder('e.g., 12 pairs, 24 pairs'),
                         ])
                         ->columns(2),
                 ])
@@ -93,6 +97,7 @@ class SocksGallery extends ListRecords
                         'ribbing_height' => $data['ribbing_height'] ?? null,
                         'fabric' => $data['fabric'] ?? null,
                         'price' => $data['price'] ?: 0,
+                        'minimums' => $data['minimums'] ?? null,
                         'is_active' => true, // Always available
                     ]);
 

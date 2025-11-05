@@ -20,6 +20,9 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -166,6 +169,45 @@ class AdminPanelProvider extends PanelProvider
                         'Content-Type' => 'text/csv; charset=UTF-8',
                     ]);
                 })->name('resources.products.download-csv-template');
+                
+                // Secure CAD file download route
+                Route::get('/media/{media}/download', function (Media $media) {
+                    // Check if the media belongs to a product and user has access
+                    $model = $media->model;
+                    if ($model && method_exists($model, 'getMedia')) {
+                        // Verify the media collection is 'cad_download'
+                        if ($media->collection_name === 'cad_download') {
+                            $diskName = $media->disk;
+                            $path = $media->getPath();
+                            
+                            // Use Storage facade for better compatibility
+                            $storage = Storage::disk($diskName);
+                            
+                            // Check if file exists
+                            if (!$storage->exists($path)) {
+                                abort(404, 'File not found: ' . $path);
+                            }
+                            
+                            // Create a streamed response for download
+                            return new StreamedResponse(function () use ($storage, $path) {
+                                $stream = $storage->readStream($path);
+                                if ($stream === false) {
+                                    abort(500, 'Could not read file');
+                                }
+                                fpassthru($stream);
+                                if (is_resource($stream)) {
+                                    fclose($stream);
+                                }
+                            }, 200, [
+                                'Content-Type' => $storage->mimeType($path) ?: 'application/octet-stream',
+                                'Content-Disposition' => 'attachment; filename="' . $media->file_name . '"',
+                                'Content-Length' => $storage->size($path),
+                            ]);
+                        }
+                    }
+                    
+                    abort(404);
+                })->name('filament.admin.media.download');
             });
     }
 }

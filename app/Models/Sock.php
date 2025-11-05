@@ -19,6 +19,7 @@ class Sock extends Model
         'ribbing_height',
         'fabric',
         'images',
+        'minimums',
         'is_active',
     ];
 
