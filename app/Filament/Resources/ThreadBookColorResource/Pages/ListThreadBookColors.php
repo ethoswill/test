@@ -4,10 +4,12 @@ namespace App\Filament\Resources\ThreadBookColorResource\Pages;
 
 use App\Filament\Resources\ThreadBookColorResource;
 use App\Filament\Resources\ThreadBookColorResource\Widgets\ThreadBookColorsHeader;
+use App\Filament\Resources\ThreadBookColorResource\Imports\ThreadBookColorImporter;
 use App\Models\TeamNote;
 use App\Models\ThreadBookColor;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
+use Filament\Actions\ImportAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Forms;
@@ -31,6 +33,11 @@ class ListThreadBookColors extends ListRecords
                 ->icon('heroicon-o-plus')
                 ->color('success')
                 ->url(ThreadBookColorResource::getUrl('create')),
+            ImportAction::make()
+                ->label('Import from CSV')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('warning')
+                ->importer(ThreadBookColorImporter::class),
             Action::make('add_rows')
                 ->label('Add Rows')
                 ->icon('heroicon-o-plus-circle')
