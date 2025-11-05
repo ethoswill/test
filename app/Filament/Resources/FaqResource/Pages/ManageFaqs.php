@@ -17,3 +17,4 @@ class ManageFaqs extends ManageRecords
         return Faq::ordered()->get();
     }
 }
+

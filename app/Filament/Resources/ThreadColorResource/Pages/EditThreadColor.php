@@ -18,3 +18,4 @@ class EditThreadColor extends EditRecord
     }
 }
 
+

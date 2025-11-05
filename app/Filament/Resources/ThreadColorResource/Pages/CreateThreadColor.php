@@ -10,3 +10,4 @@ class CreateThreadColor extends CreateRecord
     protected static string $resource = ThreadColorResource::class;
 }
 
+

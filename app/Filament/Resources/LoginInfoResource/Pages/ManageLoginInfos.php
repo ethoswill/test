@@ -17,3 +17,4 @@ class ManageLoginInfos extends ManageRecords
         return LoginInfo::active()->ordered()->get();
     }
 }
+

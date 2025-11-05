@@ -107,3 +107,4 @@ class ImportThreadColorsFromDropbox extends Command
         }
     }
 }
+

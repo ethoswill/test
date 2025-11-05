@@ -55,3 +55,4 @@ class ImportThreadColorsFromGoogleSheets extends Command
         }
     }
 }
+

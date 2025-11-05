@@ -46,3 +46,4 @@ class ManageContactInfos extends ManageRecords
         return $colors[$color] ?? 'text-blue-600';
     }
 }
+

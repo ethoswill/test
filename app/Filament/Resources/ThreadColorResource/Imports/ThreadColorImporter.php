@@ -16,13 +16,11 @@ class ThreadColorImporter extends Importer
         return [
             ImportColumn::make('color_name')
                 ->label('Thread Number')
-                ->required()
                 ->rules(['required', 'string', 'max:255'])
                 ->helperText('The thread number/identifier (e.g., 1001, 1002)')
                 ->example('1001'),
             ImportColumn::make('color_code')
                 ->label('Color Code')
-                ->required()
                 ->rules(['required', 'string', 'max:255'])
                 ->helperText('The color name (e.g., White, Black, Red)')
                 ->example('White'),
