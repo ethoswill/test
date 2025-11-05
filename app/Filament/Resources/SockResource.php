@@ -64,6 +64,10 @@ class SockResource extends Resource
                             ->numeric()
                             ->prefix('$')
                             ->placeholder('0.00'),
+                        Forms\Components\TextInput::make('minimums')
+                            ->label('Minimums')
+                            ->maxLength(255)
+                            ->placeholder('e.g., 12 pairs, 24 pairs'),
                     ])
                     ->columns(2),
             ]);
