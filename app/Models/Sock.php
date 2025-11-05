@@ -70,7 +70,7 @@ class Sock extends Model
     }
 
     /**
-     * Get the gallery_images as an array from the textarea input.
+     * Get the gallery_images as an array of objects with url and description.
      */
     public function getGalleryImagesAttribute($value)
     {
@@ -83,27 +83,51 @@ class Sock extends Model
         if (is_string($value)) {
             $decoded = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
+                // Convert old format (just URLs) to new format (objects with url and description)
+                $result = [];
+                foreach ($decoded as $item) {
+                    if (is_string($item)) {
+                        // Old format: just URL string
+                        $result[] = ['url' => $item, 'description' => ''];
+                    } elseif (is_array($item) && isset($item['url'])) {
+                        // New format: object with url and description
+                        $result[] = [
+                            'url' => $item['url'] ?? '',
+                            'description' => $item['description'] ?? ''
+                        ];
+                    }
+                }
+                return $result;
             }
-            // If not valid JSON, treat as newline-separated string
-            return array_filter(array_map('trim', explode("\n", $value)));
+            // If not valid JSON, treat as newline-separated string (legacy format)
+            $urls = array_filter(array_map('trim', explode("\n", $value)));
+            $result = [];
+            foreach ($urls as $url) {
+                $result[] = ['url' => $url, 'description' => ''];
+            }
+            return $result;
         }
         
         return [];
     }
 
     /**
-     * Set the gallery_images attribute - convert string to array for JSON storage.
+     * Set the gallery_images attribute - store as JSON array of objects.
      */
     public function setGalleryImagesAttribute($value)
     {
-        if (is_string($value)) {
-            // Split by newlines and filter empty lines
-            $array = array_filter(array_map('trim', explode("\n", $value)));
-            $this->attributes['gallery_images'] = json_encode(array_values($array));
-        } elseif (is_array($value)) {
-            // Filter empty values and encode as JSON
-            $this->attributes['gallery_images'] = json_encode(array_values(array_filter($value)));
+        if (is_array($value)) {
+            // Filter out empty items and ensure proper structure
+            $filtered = [];
+            foreach ($value as $item) {
+                if (is_array($item) && !empty($item['url'])) {
+                    $filtered[] = [
+                        'url' => trim($item['url']),
+                        'description' => trim($item['description'] ?? '')
+                    ];
+                }
+            }
+            $this->attributes['gallery_images'] = json_encode(array_values($filtered));
         } else {
             $this->attributes['gallery_images'] = json_encode([]);
         }

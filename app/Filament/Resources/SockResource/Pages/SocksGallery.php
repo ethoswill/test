@@ -91,12 +91,25 @@ class SocksGallery extends ListRecords
                     
                     Section::make('Gallery')
                         ->schema([
-                            Textarea::make('gallery_images')
+                            \Filament\Forms\Components\Repeater::make('gallery_images')
                                 ->label('Gallery Images')
-                                ->maxLength(2000)
-                                ->placeholder('Enter gallery image URLs (one per line):' . PHP_EOL . 'https://example.com/gallery1.jpg' . PHP_EOL . 'https://example.com/gallery2.jpg' . PHP_EOL . 'https://example.com/gallery3.jpg')
-                                ->helperText('Enter gallery image URLs, one per line. Each line will display as a separate image in the gallery (4 columns on desktop)')
-                                ->rows(6),
+                                ->schema([
+                                    TextInput::make('url')
+                                        ->label('Image URL')
+                                        ->required()
+                                        ->url()
+                                        ->maxLength(500)
+                                        ->placeholder('https://example.com/image.jpg'),
+                                    TextInput::make('description')
+                                        ->label('Description')
+                                        ->maxLength(255)
+                                        ->placeholder('Short description of the image'),
+                                ])
+                                ->defaultItems(0)
+                                ->itemLabel(fn (array $state): ?string => $state['description'] ?? $state['url'] ?? 'New Image')
+                                ->collapsible()
+                                ->addActionLabel('Add Gallery Image')
+                                ->reorderable(true),
                         ])
                         ->columns(1),
                 ])

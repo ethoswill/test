@@ -17,24 +17,32 @@ class SockGallery extends Widget
     
     protected function getViewData(): array
     {
-        $imageUrls = [];
+        $galleryItems = [];
         
         if ($this->record instanceof Sock) {
             // Get gallery_images from the record
-            if (is_array($this->record->gallery_images)) {
-                $imageUrls = array_filter($this->record->gallery_images);
-            } elseif (is_string($this->record->gallery_images)) {
-                $decoded = json_decode($this->record->gallery_images, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    $imageUrls = array_filter($decoded);
-                } else {
-                    $imageUrls = array_filter(array_map('trim', explode("\n", $this->record->gallery_images)));
+            $galleryData = $this->record->gallery_images;
+            
+            if (is_array($galleryData)) {
+                foreach ($galleryData as $item) {
+                    if (is_array($item) && !empty($item['url'])) {
+                        $galleryItems[] = [
+                            'url' => trim($item['url']),
+                            'description' => trim($item['description'] ?? '')
+                        ];
+                    } elseif (is_string($item)) {
+                        // Legacy format: just URL string
+                        $galleryItems[] = [
+                            'url' => trim($item),
+                            'description' => ''
+                        ];
+                    }
                 }
             }
         }
         
         return [
-            'imageUrls' => $imageUrls,
+            'galleryItems' => $galleryItems,
         ];
     }
 }
