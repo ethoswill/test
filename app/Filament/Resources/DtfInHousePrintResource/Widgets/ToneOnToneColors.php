@@ -28,6 +28,7 @@ class ToneOnToneColors extends Widget implements HasActions
     // Required properties for modal rendering
     public bool $hasFormsModalRendered = false;
     public bool $hasInfolistsModalRendered = false;
+    public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
@@ -102,6 +103,32 @@ class ToneOnToneColors extends Widget implements HasActions
     public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver
     {
         return null;
+    }
+    
+    // Stub methods required by modal component
+    public function getMountedFormComponentAction()
+    {
+        return null;
+    }
+    
+    public function mountedFormComponentActionShouldOpenModal(): bool
+    {
+        return false;
+    }
+    
+    public function mountedFormComponentActionHasForm(): bool
+    {
+        return false;
+    }
+    
+    public function getMountedFormComponentActionForm()
+    {
+        return null;
+    }
+    
+    public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void
+    {
+        // No-op for widgets that don't use form component actions
     }
 }
 
