@@ -222,25 +222,29 @@ class ProductResource extends Resource
                         );
                     })
                     ->html(),
-                Tables\Columns\TextColumn::make('cad_download_link')
+                Tables\Columns\TextColumn::make('cad_download')
                     ->label('CAD Download')
                     ->html()
-                    ->formatStateUsing(function ($state, $record) {
+                    ->state(function ($record) {
                         // Check Media Library for uploaded CAD file
                         $mediaFiles = $record->getMedia('cad_download');
                         if ($mediaFiles->isNotEmpty()) {
                             $firstMedia = $mediaFiles->first();
                             $url = $firstMedia->getUrl();
+                            $fileName = $firstMedia->file_name;
                             
                             return new \Illuminate\Support\HtmlString(
-                                '<a href="' . $url . '" target="_blank" download style="color: #3b82f6; text-decoration: underline;">
+                                '<a href="' . $url . '" target="_blank" download style="color: #3b82f6; text-decoration: underline; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
                                     Download
                                 </a>'
                             );
                         }
                         
                         // No CAD file uploaded
-                        return '-';
+                        return new \Illuminate\Support\HtmlString('<span style="color: #9ca3af;">-</span>');
                     }),
                 Tables\Columns\TextColumn::make('fabric')
                     ->searchable()
