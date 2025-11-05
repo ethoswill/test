@@ -19,6 +19,7 @@ class Sock extends Model
         'ribbing_height',
         'fabric',
         'images',
+        'gallery_images',
         'minimums',
         'is_active',
     ];
@@ -65,6 +66,46 @@ class Sock extends Model
             $this->attributes['images'] = json_encode(array_values(array_filter($value)));
         } else {
             $this->attributes['images'] = json_encode([]);
+        }
+    }
+
+    /**
+     * Get the gallery_images as an array from the textarea input.
+     */
+    public function getGalleryImagesAttribute($value)
+    {
+        // If value is already an array (from JSON cast), return it
+        if (is_array($value)) {
+            return $value ?: [];
+        }
+        
+        // If value is a JSON string, decode it
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+            // If not valid JSON, treat as newline-separated string
+            return array_filter(array_map('trim', explode("\n", $value)));
+        }
+        
+        return [];
+    }
+
+    /**
+     * Set the gallery_images attribute - convert string to array for JSON storage.
+     */
+    public function setGalleryImagesAttribute($value)
+    {
+        if (is_string($value)) {
+            // Split by newlines and filter empty lines
+            $array = array_filter(array_map('trim', explode("\n", $value)));
+            $this->attributes['gallery_images'] = json_encode(array_values($array));
+        } elseif (is_array($value)) {
+            // Filter empty values and encode as JSON
+            $this->attributes['gallery_images'] = json_encode(array_values(array_filter($value)));
+        } else {
+            $this->attributes['gallery_images'] = json_encode([]);
         }
     }
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SockResource\Pages;
 
 use App\Filament\Resources\SockResource;
+use App\Filament\Resources\SockResource\Widgets\SockGallery;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -14,6 +15,13 @@ class ViewSock extends ViewRecord
     {
         return [
             Actions\EditAction::make(),
+        ];
+    }
+    
+    protected function getFooterWidgets(): array
+    {
+        return [
+            SockGallery::class,
         ];
     }
 }

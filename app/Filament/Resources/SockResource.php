@@ -43,11 +43,11 @@ class SockResource extends Resource
                             ->rows(4)
                             ->placeholder('Enter each bullet point on a new line:' . PHP_EOL . '• Moisture-wicking technology' . PHP_EOL . '• Cushioned sole for comfort' . PHP_EOL . '• Reinforced heel and toe'),
                         Forms\Components\Textarea::make('images')
-                            ->label('Sock Image URLs')
+                            ->label('Sock Cover Image')
                             ->maxLength(1000)
-                            ->placeholder('Enter image URLs (one per line):' . PHP_EOL . 'https://example.com/sock1.jpg' . PHP_EOL . 'https://example.com/sock2.jpg')
-                            ->helperText('Enter 1-3 image URLs for the sock style (one URL per line)')
-                            ->rows(3),
+                            ->placeholder('Enter cover image URL:' . PHP_EOL . 'https://example.com/sock-cover.jpg')
+                            ->helperText('Enter the main cover image URL for this sock style')
+                            ->rows(2),
                     ])
                     ->columns(1),
                 
@@ -72,6 +72,17 @@ class SockResource extends Resource
                             ->placeholder('e.g., 12 pairs, 24 pairs'),
                     ])
                     ->columns(2),
+                
+                Forms\Components\Section::make('Gallery')
+                    ->schema([
+                        Forms\Components\Textarea::make('gallery_images')
+                            ->label('Gallery Images')
+                            ->maxLength(2000)
+                            ->placeholder('Enter gallery image URLs (one per line):' . PHP_EOL . 'https://example.com/gallery1.jpg' . PHP_EOL . 'https://example.com/gallery2.jpg' . PHP_EOL . 'https://example.com/gallery3.jpg')
+                            ->helperText('Enter gallery image URLs, one per line. Each line will display as a separate image in the gallery (4 columns on desktop)')
+                            ->rows(6),
+                    ])
+                    ->columns(1),
             ]);
     }
 
@@ -99,7 +110,7 @@ class SockResource extends Resource
                             ->markdown()
                             ->columnSpanFull(),
                         Infolists\Components\TextEntry::make('images')
-                            ->label('Gallery')
+                            ->label('Sock Cover Image')
                             ->formatStateUsing(function ($state, $record) {
                                 $imageUrls = [];
                                 
@@ -116,21 +127,16 @@ class SockResource extends Resource
                                 }
                                 
                                 if (empty($imageUrls)) {
-                                    return '<p class="text-gray-500 dark:text-gray-400">No images</p>';
+                                    return '<p class="text-gray-500 dark:text-gray-400">No cover image</p>';
                                 }
                                 
-                                $html = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">';
-                                foreach ($imageUrls as $index => $url) {
-                                    $url = trim($url);
-                                    if (!empty($url)) {
-                                        $html .= '<div class="relative aspect-square overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">';
-                                        $html .= '<img src="' . htmlspecialchars($url) . '" alt="Sock image ' . ($index + 1) . '" class="w-full h-full object-cover" loading="lazy" />';
-                                        $html .= '</div>';
-                                    }
+                                // Display first image as cover image
+                                $url = trim($imageUrls[0]);
+                                if (!empty($url)) {
+                                    return '<div class="mt-4"><img src="' . htmlspecialchars($url) . '" alt="Sock cover image" class="w-full max-w-md rounded-lg border border-gray-200 dark:border-gray-700" /></div>';
                                 }
-                                $html .= '</div>';
                                 
-                                return $html;
+                                return '<p class="text-gray-500 dark:text-gray-400">No cover image</p>';
                             })
                             ->html()
                             ->columnSpanFull(),
