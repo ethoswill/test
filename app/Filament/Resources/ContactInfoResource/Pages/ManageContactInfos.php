@@ -47,3 +47,4 @@ class ManageContactInfos extends ManageRecords
     }
 }
 
+

@@ -10,7 +10,7 @@ use App\Models\ThreadBookColor;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
 use Filament\Actions\ImportAction;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Notifications\Notification;
 use Filament\Forms;
 
@@ -114,11 +114,26 @@ class ListThreadBookColors extends ListRecords
             ->icon('heroicon-o-pencil-square')
             ->color('gray')
             ->form([
-                Textarea::make('content')
+                RichEditor::make('content')
                     ->label('Team Notes')
-                    ->placeholder('First line will be a bold header, rest as bullets:' . PHP_EOL . 'Header Title' . PHP_EOL . 'Note 1' . PHP_EOL . 'Note 2')
-                    ->rows(5)
-                    ->helperText('First line becomes a bold header. Each additional line is a bullet point.')
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
                     ->default(mb_convert_encoding($teamNote->content ?: '', 'UTF-8', 'UTF-8')),
             ])
             ->action(function (array $data): void {

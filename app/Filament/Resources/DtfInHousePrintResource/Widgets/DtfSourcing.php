@@ -3,17 +3,16 @@
 namespace App\Filament\Resources\DtfInHousePrintResource\Widgets;
 
 use App\Models\DtfWidgetContent;
+use Filament\Widgets\Widget;
+use Filament\Forms\Components\RichEditor;
+use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
-use Filament\Widgets\Widget;
+use Filament\Support\Contracts\TranslatableContentDriver;
 
-class DtfSourcing extends Widget implements HasForms, HasActions
+class DtfSourcing extends Widget implements HasActions
 {
-    use InteractsWithForms;
     use InteractsWithActions;
 
     protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.dtf-sourcing';
@@ -25,9 +24,9 @@ class DtfSourcing extends Widget implements HasForms, HasActions
     protected static bool $isLazy = false;
 
     public $content = '';
-
-    public $showEditModal = false;
-    public $editContent = '';
+    public bool $hasFormsModalRendered = false;
+    public bool $hasInfolistsModalRendered = false;
+    public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
@@ -37,32 +36,76 @@ class DtfSourcing extends Widget implements HasForms, HasActions
         );
         
         $this->content = $widget->content ?: '';
-    }
-    
-    public function openEditModal()
-    {
-        $this->editContent = $this->content;
-        $this->showEditModal = true;
-    }
-    
-    public function closeEditModal()
-    {
-        $this->showEditModal = false;
-    }
-    
-    public function saveContent()
-    {
-        $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'dtf_sourcing']);
-        $widget->content = $this->editContent;
-        $widget->save();
         
-        $this->content = $widget->content;
-        $this->showEditModal = false;
-        
-        Notification::make()
-            ->title('Content updated successfully!')
-            ->success()
-            ->send();
+        foreach ($this->getActions() as $action) {
+            if ($action instanceof Action) {
+                $this->cacheAction($action);
+            }
+        }
     }
+
+    public function editContent(): Action
+    {
+        return Action::make('edit_content')
+            ->label('Edit')
+            ->icon('heroicon-o-pencil-square')
+            ->color('primary')
+            ->form([
+                RichEditor::make('content')
+                    ->label('Content')
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
+                    ->default(fn () => $this->content),
+            ])
+            ->action(function (array $data): void {
+                $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'dtf_sourcing']);
+                $widget->content = $data['content'];
+                $widget->save();
+
+                $this->content = $widget->content;
+
+                Notification::make()
+                    ->title('Content updated successfully!')
+                    ->success()
+                    ->send();
+            })
+            ->requiresConfirmation(false)
+            ->modalHeading('Edit DTF Sourcing')
+            ->modalSubmitActionLabel('Save');
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            $this->editContent(),
+        ];
+    }
+
+    public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver
+    {
+        return null;
+    }
+
+    public function getMountedFormComponentAction() { return null; }
+    public function mountedFormComponentActionShouldOpenModal(): bool { return false; }
+    public function mountedFormComponentActionHasForm(): bool { return false; }
+    public function getMountedFormComponentActionForm() { return null; }
+    public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void {}
 }
 

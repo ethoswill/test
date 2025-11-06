@@ -66,13 +66,31 @@ class ThreadBookColorResource extends Resource
                                 'blacks' => 'Blacks',
                                 'whites' => 'Whites',
                                 'metallics' => 'Metallics',
+                                'multi' => 'Multi',
+                                'glitter' => 'Glitter',
+                                'heather' => 'Heather',
                             ])
                             ->placeholder('Select a color category'),
-                        Forms\Components\Textarea::make('description')
+                        Forms\Components\RichEditor::make('description')
                             ->label('Description/Notes')
-                            ->maxLength(1000)
-                            ->rows(4)
-                            ->placeholder('Additional notes about this color'),
+                            ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                            ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                            ->toolbarButtons([
+                                'attachFiles',
+                                'blockquote',
+                                'bold',
+                                'bulletList',
+                                'codeBlock',
+                                'h2',
+                                'h3',
+                                'italic',
+                                'link',
+                                'orderedList',
+                                'redo',
+                                'strike',
+                                'underline',
+                                'undo',
+                            ]),
                     ])
                     ->columns(1),
             ]);
@@ -127,6 +145,9 @@ class ThreadBookColorResource extends Resource
                         'blacks' => 'Blacks',
                         'whites' => 'Whites',
                         'metallics' => 'Metallics',
+                        'multi' => 'Multi',
+                        'glitter' => 'Glitter',
+                        'heather' => 'Heather',
                     ]),
             ], layout: Tables\Enums\FiltersLayout::Dropdown)
             ->persistFiltersInSession()

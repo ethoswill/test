@@ -207,7 +207,7 @@ class AdminPanelProvider extends PanelProvider
                     }
                     
                     abort(404);
-                })->name('filament.admin.media.download');
+                })->name('media.download');
             });
     }
 }

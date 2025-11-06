@@ -6,17 +6,25 @@ use App\Models\TeamNote;
 use Filament\Widgets\Widget;
 use Filament\Forms\Components\RichEditor;
 use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Notifications\Notification;
+use Filament\Support\Contracts\TranslatableContentDriver;
 use Illuminate\Support\Facades\Auth;
 
-class PuffPrintHeader extends Widget
+class PuffPrintHeader extends Widget implements HasActions
 {
+    use InteractsWithActions;
+
     protected static string $view = 'filament.resources.puff-print-color-resource.widgets.puff-print-header';
 
     protected int | string | array $columnSpan = 'full';
 
     public $content = '';
     public $isEditable = false;
+    public bool $hasFormsModalRendered = false;
+    public bool $hasInfolistsModalRendered = false;
+    public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
@@ -41,6 +49,12 @@ class PuffPrintHeader extends Widget
         }
         
         $this->content = $content ?: '';
+        
+        foreach ($this->getActions() as $action) {
+            if ($action instanceof Action) {
+                $this->cacheAction($action);
+            }
+        }
     }
 
     public function getViewData(): array
@@ -95,7 +109,7 @@ class PuffPrintHeader extends Widget
             ->modalSubmitActionLabel('Save');
     }
 
-    protected function getActions(): array
+    public function getActions(): array
     {
         if (!$this->isEditable) {
             return [];
@@ -105,5 +119,16 @@ class PuffPrintHeader extends Widget
             $this->editNotes(),
         ];
     }
+
+    public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver
+    {
+        return null;
+    }
+
+    public function getMountedFormComponentAction() { return null; }
+    public function mountedFormComponentActionShouldOpenModal(): bool { return false; }
+    public function mountedFormComponentActionHasForm(): bool { return false; }
+    public function getMountedFormComponentActionForm() { return null; }
+    public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void {}
 }
 

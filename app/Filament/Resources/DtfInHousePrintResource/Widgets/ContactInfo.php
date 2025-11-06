@@ -4,9 +4,17 @@ namespace App\Filament\Resources\DtfInHousePrintResource\Widgets;
 
 use App\Models\DtfWidgetContent;
 use Filament\Widgets\Widget;
+use Filament\Forms\Components\RichEditor;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Notifications\Notification;
+use Filament\Support\Contracts\TranslatableContentDriver;
 
-class ContactInfo extends Widget
+class ContactInfo extends Widget implements HasActions
 {
+    use InteractsWithActions;
+
     protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.contact-info';
 
     protected int | string | array $columnSpan = 'full';
@@ -16,7 +24,9 @@ class ContactInfo extends Widget
     protected static bool $isLazy = false;
 
     public $content = '';
-    public $showForm = false;
+    public bool $hasFormsModalRendered = false;
+    public bool $hasInfolistsModalRendered = false;
+    public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
@@ -26,25 +36,76 @@ class ContactInfo extends Widget
         );
         
         $this->content = $widget->content ?: '';
+        
+        foreach ($this->getActions() as $action) {
+            if ($action instanceof Action) {
+                $this->cacheAction($action);
+            }
+        }
     }
 
-    public function toggleEdit(): void
+    public function editContent(): Action
     {
-        $this->showForm = !$this->showForm;
+        return Action::make('edit_content')
+            ->label($this->content ? 'Edit Content' : 'Add Content')
+            ->icon('heroicon-o-pencil-square')
+            ->color('primary')
+            ->form([
+                RichEditor::make('content')
+                    ->label('Content')
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
+                    ->default(fn () => $this->content),
+            ])
+            ->action(function (array $data): void {
+                $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'dtf_contact_info']);
+                $widget->content = $data['content'];
+                $widget->save();
+
+                $this->content = $widget->content;
+
+                Notification::make()
+                    ->title('Content updated successfully!')
+                    ->success()
+                    ->send();
+            })
+            ->requiresConfirmation(false)
+            ->modalHeading('Edit DTF Contact Info')
+            ->modalSubmitActionLabel('Save');
     }
 
-    public function saveContent(): void
+    protected function getActions(): array
     {
-        $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'dtf_contact_info']);
-        $widget->content = $this->content;
-        $widget->save();
-
-        $this->showForm = false;
-
-        \Filament\Notifications\Notification::make()
-            ->title('Content updated successfully!')
-            ->success()
-            ->send();
+        return [
+            $this->editContent(),
+        ];
     }
+
+    public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver
+    {
+        return null;
+    }
+
+    public function getMountedFormComponentAction() { return null; }
+    public function mountedFormComponentActionShouldOpenModal(): bool { return false; }
+    public function mountedFormComponentActionHasForm(): bool { return false; }
+    public function getMountedFormComponentActionForm() { return null; }
+    public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void {}
 }
 

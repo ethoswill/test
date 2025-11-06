@@ -141,10 +141,26 @@ class ProductResource extends Resource
 
                 Section::make('Notes')
                     ->schema([
-                        Forms\Components\Textarea::make('notes')
+                        Forms\Components\RichEditor::make('notes')
                             ->label('Product Notes')
-                            ->rows(4)
-                            ->placeholder('Add any additional notes about this product...')
+                            ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                            ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                            ->toolbarButtons([
+                                'attachFiles',
+                                'blockquote',
+                                'bold',
+                                'bulletList',
+                                'codeBlock',
+                                'h2',
+                                'h3',
+                                'italic',
+                                'link',
+                                'orderedList',
+                                'redo',
+                                'strike',
+                                'underline',
+                                'undo',
+                            ])
                     ->columnSpanFull(),
                     ])
                     ->collapsible(),

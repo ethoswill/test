@@ -1,6 +1,5 @@
 <x-filament-widgets::widget>
-    <div class="widget-content space-y-4">
-        <!-- Team Notes Section -->
+    <div class="widget-content">
         <x-filament::section>
             <x-slot name="header">
                 <div class="flex items-center justify-between">
@@ -21,4 +20,3 @@
     </div>
     <x-filament-actions::modals />
 </x-filament-widgets::widget>
-

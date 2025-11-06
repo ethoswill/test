@@ -4,9 +4,18 @@ namespace App\Filament\Resources\DtfInHousePrintResource\Widgets;
 
 use App\Models\DtfWidgetContent;
 use Filament\Widgets\Widget;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\TextInput;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Notifications\Notification;
+use Filament\Support\Contracts\TranslatableContentDriver;
 
-class IccProfiling extends Widget
+class IccProfiling extends Widget implements HasActions
 {
+    use InteractsWithActions;
+
     protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.icc-profiling';
 
     protected int | string | array $columnSpan = 'full';
@@ -17,8 +26,10 @@ class IccProfiling extends Widget
 
     public $content = '';
     public $existingImages = [];
-    public $showForm = false;
     public $imageUrl = '';
+    public bool $hasFormsModalRendered = false;
+    public bool $hasInfolistsModalRendered = false;
+    public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
@@ -31,12 +42,99 @@ class IccProfiling extends Widget
         $data = json_decode($widget->content ?: '{}', true) ?: [];
         $this->content = $data['text'] ?? '';
         $this->existingImages = $data['images'] ?? [];
+        
+        foreach ($this->getActions() as $action) {
+            if ($action instanceof Action) {
+                $this->cacheAction($action);
+            }
+        }
     }
 
-    public function toggleEdit(): void
+    public function editContent(): Action
     {
-        $this->showForm = !$this->showForm;
+        return Action::make('edit_content')
+            ->label($this->content || !empty($this->existingImages) ? 'Edit Content' : 'Add Content')
+            ->icon('heroicon-o-pencil-square')
+            ->color('primary')
+            ->form([
+                RichEditor::make('content')
+                    ->label('Content')
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
+                    ->default(fn () => $this->content),
+                TextInput::make('imageUrl')
+                    ->label('Add Image from URL (Optional)')
+                    ->url()
+                    ->placeholder('https://example.com/image.jpg')
+                    ->helperText('Paste an image URL (jpg, png, gif, webp, svg). Images are saved separately.')
+                    ->required(false),
+            ])
+            ->action(function (array $data): void {
+                // Handle image URL if provided
+                if (!empty($data['imageUrl'] ?? '')) {
+                    $imageUrl = trim($data['imageUrl']);
+                    if (filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                        $extension = strtolower(pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
+                        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                        if (in_array($extension, $allowedExtensions)) {
+                            $this->existingImages[] = $imageUrl;
+                        }
+                    }
+                }
+                
+                $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'icc_profiling']);
+                $widget->content = json_encode([
+                    'text' => $data['content'] ?? '',
+                    'images' => $this->existingImages
+                ]);
+                $widget->save();
+
+                $this->content = $data['content'] ?? '';
+
+                Notification::make()
+                    ->title('Content updated successfully!')
+                    ->success()
+                    ->send();
+            })
+            ->requiresConfirmation(false)
+            ->modalHeading('Edit ICC Profiling')
+            ->modalSubmitActionLabel('Save')
+            ->modalWidth('4xl');
     }
+
+    protected function getActions(): array
+    {
+        return [
+            $this->editContent(),
+        ];
+    }
+
+    public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver
+    {
+        return null;
+    }
+
+    public function getMountedFormComponentAction() { return null; }
+    public function mountedFormComponentActionShouldOpenModal(): bool { return false; }
+    public function mountedFormComponentActionHasForm(): bool { return false; }
+    public function getMountedFormComponentActionForm() { return null; }
+    public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void {}
 
     public function removeImage($index): void
     {

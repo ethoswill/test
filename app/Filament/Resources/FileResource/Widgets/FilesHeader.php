@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\DtfInHousePrintResource\Widgets;
+namespace App\Filament\Resources\FileResource\Widgets;
 
-use App\Models\DtfWidgetContent;
+use App\Models\TeamNote;
 use Filament\Widgets\Widget;
 use Filament\Forms\Components\RichEditor;
 use Filament\Actions\Action;
@@ -10,32 +10,45 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Notifications\Notification;
 use Filament\Support\Contracts\TranslatableContentDriver;
+use Illuminate\Support\Facades\Auth;
 
-class CareOfDtfGarment extends Widget implements HasActions
+class FilesHeader extends Widget implements HasActions
 {
     use InteractsWithActions;
 
-    protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.care-of-dtf-garment';
+    protected static string $view = 'filament.resources.file-resource.widgets.files-header';
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?int $sort = 8;
-    
-    protected static bool $isLazy = false;
-
     public $content = '';
+    public $isEditable = false;
     public bool $hasFormsModalRendered = false;
     public bool $hasInfolistsModalRendered = false;
     public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
-        $widget = DtfWidgetContent::firstOrCreate(
-            ['widget_name' => 'care_of_dtf_garment'],
+        // Check if user is super admin - check for 'super-admin' role
+        $user = Auth::user();
+        
+        // TEMPORARY: Allow all logged-in users to edit for testing
+        $this->isEditable = $user !== null;
+        
+        // Get or create the team note for this page
+        $teamNote = TeamNote::firstOrCreate(
+            ['page' => 'files'],
             ['content' => '']
         );
         
-        $this->content = $widget->content ?: '';
+        // Get content, use empty string if null or invalid
+        $content = $teamNote->content ?? '';
+        
+        // Simple UTF-8 sanitization
+        if ($content && !mb_check_encoding($content, 'UTF-8')) {
+            $content = '';
+        }
+        
+        $this->content = $content ?: '';
         
         foreach ($this->getActions() as $action) {
             if ($action instanceof Action) {
@@ -44,15 +57,20 @@ class CareOfDtfGarment extends Widget implements HasActions
         }
     }
 
-    public function editContent(): Action
+    public function getViewData(): array
     {
-        return Action::make('edit_content')
-            ->label($this->content ? 'Edit Content' : 'Add Content')
+        return [];
+    }
+
+    public function editNotes(): Action
+    {
+        return Action::make('edit_notes')
+            ->label('Edit Notes')
             ->icon('heroicon-o-pencil-square')
-            ->color('primary')
+            ->color('gray')
             ->form([
                 RichEditor::make('content')
-                    ->label('Content')
+                    ->label('Team Notes')
                     ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
                     ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
                     ->toolbarButtons([
@@ -74,26 +92,31 @@ class CareOfDtfGarment extends Widget implements HasActions
                     ->default(fn () => $this->content),
             ])
             ->action(function (array $data): void {
-                $widget = DtfWidgetContent::firstOrNew(['widget_name' => 'care_of_dtf_garment']);
-                $widget->content = $data['content'];
-                $widget->save();
-
-                $this->content = $widget->content;
+                $teamNote = TeamNote::firstOrNew(['page' => 'files']);
+                $teamNote->content = $data['content'];
+                $teamNote->save();
 
                 Notification::make()
-                    ->title('Content updated successfully!')
+                    ->title('Notes updated successfully!')
                     ->success()
                     ->send();
+                
+                // Refresh the content
+                $this->content = $teamNote->content;
             })
             ->requiresConfirmation(false)
-            ->modalHeading('Edit Care of DTF Garment')
+            ->modalHeading('Edit Team Notes')
             ->modalSubmitActionLabel('Save');
     }
 
-    protected function getActions(): array
+    public function getActions(): array
     {
+        if (!$this->isEditable) {
+            return [];
+        }
+
         return [
-            $this->editContent(),
+            $this->editNotes(),
         ];
     }
 
@@ -108,10 +131,4 @@ class CareOfDtfGarment extends Widget implements HasActions
     public function getMountedFormComponentActionForm() { return null; }
     public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void {}
 }
-
-
-
-
-
-
 

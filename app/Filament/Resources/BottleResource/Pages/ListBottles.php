@@ -6,7 +6,8 @@ use App\Filament\Resources\BottleResource;
 use App\Filament\Resources\BottleResource\Widgets\BottlesHeader;
 use App\Models\TeamNote;
 use Filament\Actions;
-use Filament\Forms\Components\Textarea;
+use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 
@@ -29,16 +30,31 @@ class ListBottles extends ListRecords
         // Add team notes edit action
         $teamNote = TeamNote::firstOrCreate(['page' => 'bottles'], ['content' => '']);
         
-        $actions[] = Actions\Action::make('edit_team_notes')
+        $actions[] = Action::make('edit_team_notes')
             ->label('Edit Team Notes')
             ->icon('heroicon-o-pencil-square')
             ->color('gray')
             ->form([
-                Textarea::make('content')
+                RichEditor::make('content')
                     ->label('Team Notes')
-                    ->placeholder('First line will be a bold header, rest as bullets:' . PHP_EOL . 'Header Title' . PHP_EOL . 'Note 1' . PHP_EOL . 'Note 2')
-                    ->rows(5)
-                    ->helperText('First line becomes a bold header. Each additional line is a bullet point.')
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
                     ->default(mb_convert_encoding($teamNote->content ?: '', 'UTF-8', 'UTF-8')),
             ])
             ->action(function (array $data): void {

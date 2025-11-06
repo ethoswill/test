@@ -4,21 +4,27 @@ namespace App\Filament\Resources\BottleResource\Widgets;
 
 use App\Models\TeamNote;
 use Filament\Widgets\Widget;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Notifications\Notification;
+use Filament\Support\Contracts\TranslatableContentDriver;
 use Illuminate\Support\Facades\Auth;
 
-class BottlesHeader extends Widget
+class BottlesHeader extends Widget implements HasActions
 {
+    use InteractsWithActions;
+
     protected static string $view = 'filament.resources.bottle-resource.widgets.bottles-header';
 
     protected int | string | array $columnSpan = 'full';
 
     public $content = '';
     public $isEditable = false;
-    public bool $showEditModal = false;
-    public string $editContent = '';
+    public bool $hasFormsModalRendered = false;
+    public bool $hasInfolistsModalRendered = false;
+    public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
@@ -43,6 +49,12 @@ class BottlesHeader extends Widget
         }
         
         $this->content = $content ?: '';
+        
+        foreach ($this->getActions() as $action) {
+            if ($action instanceof Action) {
+                $this->cacheAction($action);
+            }
+        }
     }
 
     public function getViewData(): array
@@ -50,32 +62,73 @@ class BottlesHeader extends Widget
         return [];
     }
 
-    public function openEditModal(): void
+    public function editNotes(): Action
     {
-        $this->editContent = $this->content;
-        $this->showEditModal = true;
+        return Action::make('edit_notes')
+            ->label('Edit Notes')
+            ->icon('heroicon-o-pencil-square')
+            ->color('gray')
+            ->form([
+                RichEditor::make('content')
+                    ->label('Team Notes')
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
+                    ->default(fn () => $this->content),
+            ])
+            ->action(function (array $data): void {
+                $teamNote = TeamNote::firstOrNew(['page' => 'bottles']);
+                $teamNote->content = $data['content'];
+                $teamNote->save();
+
+                Notification::make()
+                    ->title('Notes updated successfully!')
+                    ->success()
+                    ->send();
+                
+                // Refresh the content
+                $this->content = $teamNote->content;
+            })
+            ->requiresConfirmation(false)
+            ->modalHeading('Edit Team Notes')
+            ->modalSubmitActionLabel('Save');
     }
 
-    public function closeEditModal(): void
+    public function getActions(): array
     {
-        $this->showEditModal = false;
-        $this->editContent = '';
+        if (!$this->isEditable) {
+            return [];
+        }
+
+        return [
+            $this->editNotes(),
+        ];
     }
 
-    public function saveNotes(): void
+    public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver
     {
-        $teamNote = TeamNote::firstOrNew(['page' => 'bottles']);
-        $teamNote->content = $this->editContent;
-        $teamNote->save();
-
-        Notification::make()
-            ->title('Notes updated successfully!')
-            ->success()
-            ->send();
-        
-        // Refresh the content
-        $this->content = $teamNote->content;
-        $this->showEditModal = false;
+        return null;
     }
+
+    public function getMountedFormComponentAction() { return null; }
+    public function mountedFormComponentActionShouldOpenModal(): bool { return false; }
+    public function mountedFormComponentActionHasForm(): bool { return false; }
+    public function getMountedFormComponentActionForm() { return null; }
+    public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void {}
 }
 

@@ -2,10 +2,10 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="mb-4 px-4">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                Machine Settings
+            Machine Settings
             </h3>
             <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
-                Same for ALL colors
+                    Same for ALL colors
             </p>
         </div>
         <div class="space-y-3">

@@ -4,19 +4,27 @@ namespace App\Filament\Resources\DtfInHousePrintResource\Widgets;
 
 use App\Models\TeamNote;
 use Filament\Widgets\Widget;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Notifications\Notification;
+use Filament\Support\Contracts\TranslatableContentDriver;
 use Illuminate\Support\Facades\Auth;
 
-class DtfInHousePrintHeader extends Widget
+class DtfInHousePrintHeader extends Widget implements HasActions
 {
+    use InteractsWithActions;
+
     protected static string $view = 'filament.resources.dtf-in-house-print-resource.widgets.dtf-in-house-print-header';
 
     protected int | string | array $columnSpan = 'full';
 
     public $content = '';
     public $isEditable = false;
+    public bool $hasFormsModalRendered = false;
+    public bool $hasInfolistsModalRendered = false;
+    public ?array $mountedFormComponentActions = [];
 
     public function mount(): void
     {
@@ -41,6 +49,12 @@ class DtfInHousePrintHeader extends Widget
         }
         
         $this->content = $content ?: '';
+        
+        foreach ($this->getActions() as $action) {
+            if ($action instanceof Action) {
+                $this->cacheAction($action);
+            }
+        }
     }
 
     public function getViewData(): array
@@ -55,10 +69,26 @@ class DtfInHousePrintHeader extends Widget
             ->icon('heroicon-o-pencil-square')
             ->color('gray')
             ->form([
-                Textarea::make('content')
+                RichEditor::make('content')
                     ->label('Team Notes')
-                    ->placeholder('First line will be a bold header, rest as bullets:' . PHP_EOL . 'Header Title' . PHP_EOL . 'Note 1' . PHP_EOL . 'Note 2')
-                    ->rows(5)
+                    ->placeholder('Enter your notes here. You can use HTML tags like <h3>Heading</h3> and <br> for line breaks.')
+                    ->helperText('You can use HTML tags like <h3>, <h2>, <br>, <p>, <strong>, <em>, etc.')
+                    ->toolbarButtons([
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h2',
+                        'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'underline',
+                        'undo',
+                    ])
                     ->default(fn () => $this->content),
             ])
             ->action(function (array $data): void {
@@ -79,7 +109,7 @@ class DtfInHousePrintHeader extends Widget
             ->modalSubmitActionLabel('Save');
     }
 
-    protected function getActions(): array
+    public function getActions(): array
     {
         if (!$this->isEditable) {
             return [];
@@ -89,5 +119,16 @@ class DtfInHousePrintHeader extends Widget
             $this->editNotes(),
         ];
     }
+
+    public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver
+    {
+        return null;
+    }
+
+    public function getMountedFormComponentAction() { return null; }
+    public function mountedFormComponentActionShouldOpenModal(): bool { return false; }
+    public function mountedFormComponentActionHasForm(): bool { return false; }
+    public function getMountedFormComponentActionForm() { return null; }
+    public function unmountFormComponentAction(bool $shouldCancelParentActions = true, bool $shouldCloseModal = true): void {}
 }
 
